@@ -27,6 +27,12 @@ permissions:
   claimPlugin.command.remove:
     description: Allow player to use remove command
     default: false
+  claimPlugin.command.addOwner:
+    description: Allow player to add a owner to a claim
+    default: false
+  claimPlugin.command.delOwner:
+    description: Allow player to remove a owner from a claim
+    default: false
   claimPlugin.command.*:
     description: Allow player to use all commands
     default: false
@@ -35,6 +41,8 @@ permissions:
       claimPlugin.command.create: true
       claimPlugin.command.remove: true
       claimPlugin.command.info: true
+      claimPlugin.command.addOwner: true
+      claimPlugin.command.delOwner: true
   claimPlugin.others.remove:
     description: Allow player to remove others claims
     default: false

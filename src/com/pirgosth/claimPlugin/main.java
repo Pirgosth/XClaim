@@ -1,12 +1,15 @@
 package com.pirgosth.claimPlugin;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,6 +24,13 @@ public class main extends JavaPlugin{
 	public static void log(final String message) {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
 	}
+	
+	public static void saveData(ConsoleCommandSender console) {
+		claimsYml.save();
+		playersYml.save();
+		console.sendMessage("[ClaimPlugin] Data saved");
+	}
+	
 	public static BlockVector3 Location2Vector(Location l) {
 		return BlockVector3.at(l.getBlockX(), l.getBlockY(), l.getBlockZ());
 	}
@@ -34,8 +44,38 @@ public class main extends JavaPlugin{
 		return false;
 	}
 	
+	public static boolean containsIgnoringCase(Collection<? extends Player> l, String s) {
+		for(Player p: l) {
+			if(p.getName().equalsIgnoreCase(s)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean containsIgnoringCase(Set<String> l, String s) {
+		for(String e: l) {
+			if(e.equalsIgnoreCase(s)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static void insufficientPerm(Player p, String perm) {
 		p.sendMessage(ChatColor.DARK_RED+"Missing permission: -"+perm);
+	}
+	
+	public static void updatePlayerRegion(Player player) {
+		cds.put(player.getName(), ClaimData.getInRegion(player.getLocation()));
+	}
+	
+	public static ClaimData getPlayerRegion(Player player) {
+		return cds.get(player.getName());
+	}
+	
+	public static void setPlayerRegion(Player player, ClaimData cd) {
+		main.cds.put(player.getName(), cd);
 	}
 	
 	@Override
@@ -57,18 +97,18 @@ public class main extends JavaPlugin{
 			return;
 		}
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
-		getCommand("test").setExecutor(new CommandTest());
 		getCommand("claim").setExecutor(new CommandClaim());
 		getCommand("claim").setTabCompleter(new ClaimTabComplete());
 		//Refresh players' claimData when plugin is reloaded
 		for(Player player: Bukkit.getOnlinePlayers()) {
-			cds.put(player.getName(), ClaimData.getInRegion(player.getLocation()));
+			updatePlayerRegion(player);
 		}
+		new YmlAutoSave(this).runTaskTimer(this, 200, 36000);
 		log("[ClaimPlugin]" + ChatColor.GREEN + "Plugin loaded !");
 	}
 
 	@Override
 	public void onDisable() {
-		
+		saveData(getServer().getConsoleSender());
 	}
 }

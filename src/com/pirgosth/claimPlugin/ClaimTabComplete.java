@@ -2,11 +2,14 @@ package com.pirgosth.claimPlugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 public class ClaimTabComplete implements TabCompleter{
@@ -15,7 +18,33 @@ public class ClaimTabComplete implements TabCompleter{
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
 		if(args.length == 1){
 			final List<String> completions = new ArrayList<>();
-			StringUtil.copyPartialMatches(args[0], Arrays.asList("create", "info", "remove"), completions);
+			StringUtil.copyPartialMatches(args[0], Arrays.asList("addMember", "addOwner", "create", "delMember", "delOwner", "info", "list", "remove"), completions);
+			return completions;
+		}
+		else if(args.length == 2 && args[0].equalsIgnoreCase("remove")) {
+			if(main.playersYml.get().getConfigurationSection(sender.getName()+".claims") == null) {
+				return new ArrayList<String>();
+			}
+			final List<String> completions = new ArrayList<>();
+			StringUtil.copyPartialMatches(args[1], new ArrayList<String>(main.playersYml.get().getConfigurationSection(sender.getName()+".claims").getKeys(false)), completions);
+			return completions;
+		}
+		else if(args.length == 2 && args[0].equalsIgnoreCase("addOwner")) {
+			final Collection<? extends Player> online = Bukkit.getOnlinePlayers();
+			ArrayList<String> players = new ArrayList<String>();
+			for(Player player: online) {
+				players.add(player.getName());
+			}
+			final List<String> completions = new ArrayList<>();
+			StringUtil.copyPartialMatches(args[1], players, completions);
+			return completions;
+		}
+		else if(args.length == 2 && args[0].equalsIgnoreCase("delOwner")) {
+			if(main.cds.get(sender.getName()) == null || !main.containsIgnoringCase(main.cds.get(sender.getName()).getOwners(), sender.getName())) {
+				return new ArrayList<String>();
+			}
+			final List<String> completions = new ArrayList<>();
+			StringUtil.copyPartialMatches(args[1], main.cds.get(sender.getName()).getOwners(), completions);
 			return completions;
 		}
 		else if(args.length == 3 && args[0].equalsIgnoreCase("create")) {

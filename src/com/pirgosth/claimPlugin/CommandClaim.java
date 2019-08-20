@@ -2,7 +2,9 @@ package com.pirgosth.claimPlugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -18,46 +20,48 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
 
 public class CommandClaim implements CommandExecutor{
-	public class CuboidRegionExtended{
-		public CuboidRegion region;
-		public BlockVector3 pos1;
-		public BlockVector3 pos2;
-		public CuboidRegionExtended(CuboidRegion region, BlockVector3 pos1, BlockVector3 pos2) {
-			this.region = region;
-			this.pos1 = pos1;
-			this.pos2 = pos2;
-		}
-	}
 	
-	private CuboidRegionExtended getOnPlayerCenteredCuboid(Player player, int length, int yMax) {
+	private CuboidRegion getOnPlayerCenteredCuboid(Player player, int length, int yMax) {
 		if(length <= 0) {
 			return null;
 		}
 		BlockVector3 playerPos = BlockVector3.at(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ());
 		BlockVector3 pos1 = BlockVector3.at(playerPos.getX()-length/2, 0, playerPos.getZ()-length/2);
 		BlockVector3 pos2 = BlockVector3.at(playerPos.getX()+length/2, yMax, playerPos.getZ()+length/2);
-		return new CuboidRegionExtended(new CuboidRegion(pos1, pos2), pos1, pos2);
+		return new CuboidRegion(pos1, pos2);
 	}
 	
 	private String claimYmlFormat(BlockVector3 pos1, BlockVector3 pos2) {
-		return "regions.("+pos1.getBlockX()+"," + pos1.getBlockY() + "," + pos1.getBlockZ() + ")/("
+		return "("+pos1.getBlockX()+"," + pos1.getBlockY() + "," + pos1.getBlockZ() + ")/("
 				+ pos2.getBlockX() + "," + pos2.getBlockY() + "," + pos2.getBlockZ() + ")";
 	}
 	
-	public void dispClaimInfo(Player p) {
-		ChatColor valueColor = ChatColor.GREEN;
+	public void dispClaimInfo(Player player) {
+		ChatColor valueColor = ChatColor.AQUA;
 		ChatColor textColor = ChatColor.GRAY;
-		ClaimData cd = main.cds.get(p.getName());
+		ClaimData cd = main.getPlayerRegion(player);
 		if(cd != null) {
 			int radius = Math.abs(cd.getCoordinates().pos1().getBlockX()-cd.getCoordinates().pos2().getBlockX());
-			p.sendMessage(textColor+"Claim Info:\nName: "+valueColor+cd.getName()+
+			player.sendMessage(textColor+"Claim Info:\nName: "+valueColor+cd.getName()+
 					textColor+"\nBorders: "+valueColor+cd.getNode()+
 					textColor+"\nRadius: "+valueColor+radius+
 					textColor+"\nOwners: "+valueColor+cd.getOwners());
 		}
 		else {
-			p.sendMessage(textColor+"You're not in a claim!");
+			player.sendMessage(textColor+"You're not in a claim!");
 		}
+	}
+	
+	public void dispClaimList(Player player) {
+		ChatColor valueColor = ChatColor.GREEN;
+		ChatColor textColor = ChatColor.GRAY;
+		if(main.playersYml.get().getConfigurationSection(player.getName()+".claims") == null || 
+				main.playersYml.get().getConfigurationSection(player.getName()+".claims").getKeys(false).size() == 0) {
+			player.sendMessage(textColor+"You have no claims");
+			return;
+		}
+		Set<String> list = main.playersYml.get().getConfigurationSection(player.getName()+".claims").getKeys(false);
+		player.sendMessage(textColor+"Your claims: "+valueColor+list);
 	}
 	
 	public boolean isClaimInClearArea(Player player, CuboidRegion region) {
@@ -76,25 +80,25 @@ public class CommandClaim implements CommandExecutor{
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if(!(sender instanceof Player)) {
-			sender.sendMessage(ChatColor.RED + "Console can't execute this command !");
+			sender.sendMessage(ChatColor.DARK_RED + "Console can't execute this command !");
 			return true;
 		}
-		Player p = (Player) sender;
+		Player player = (Player) sender;
 		try {
 			WorldEditPlugin we = WorldEditCatcher.getWorldEdit();
 			if(args.length > 0) {
 				if(args[0].equalsIgnoreCase("create")) {
-					if(!p.hasPermission("claimPlugin.command.create")) {
-						main.insufficientPerm(p, "claimPlugin.command.create");
+					if(!player.hasPermission("claimPlugin.command.create")) {
+						main.insufficientPerm(player, "claimPlugin.command.create");
 						return true;
 					}
 					if(args.length > 2) {
-						if(main.cds.get(p.getName()) == null) {
+						if(main.cds.get(player.getName()) == null) {
 							if(args[2].equalsIgnoreCase("cuboid") && args.length == 4) {
 								//Cuboid claim
-								if(main.playersYml.get().getConfigurationSection(p.getName()) != null &&
-										main.containsIgnoringCase(new ArrayList<String>(main.playersYml.get().getConfigurationSection(p.getName()).getKeys(false)), args[1])) {
-									p.sendMessage(ChatColor.GRAY+"You have already a claim named "+ChatColor.GOLD+args[1]);
+								if(main.playersYml.get().getConfigurationSection(player.getName()+".claims") != null &&
+										main.containsIgnoringCase(new ArrayList<String>(main.playersYml.get().getConfigurationSection(player.getName()+".claims").getKeys(false)), args[1])) {
+									player.sendMessage(ChatColor.GRAY+"You have already a claim named "+ChatColor.GOLD+args[1]);
 									return true;
 								}
 								int r = -1;
@@ -109,36 +113,31 @@ public class CommandClaim implements CommandExecutor{
 									sender.sendMessage(ChatColor.DARK_RED+"Invalid argument! Size must be between 1 and 200 !");
 									return true;
 								}
-								CuboidRegionExtended select = getOnPlayerCenteredCuboid(p, r, 400);
+								CuboidRegion select = getOnPlayerCenteredCuboid(player, r, 400);
 								
 								//If claim is to near from another
-								if(!isClaimInClearArea(p, select.region)) {
-									p.sendMessage(ChatColor.DARK_AQUA+"Your claim is to near from another one.");
+								if(!isClaimInClearArea(player, select)) {
+									player.sendMessage(ChatColor.DARK_AQUA+"Your claim is to near from another one.");
 									return true;
 								}
-								String claimArea = claimYmlFormat(select.pos1, select.pos2);
-								main.claimsYml.get().set(claimArea+".name", args[1]);
-								main.claimsYml.get().set(claimArea+".owners", Arrays.asList(sender.getName()));
-								main.claimsYml.save();
-								main.playersYml.get().set(p.getName()+"."+args[1]+".node", claimArea);
-								main.playersYml.save();
-								sender.sendMessage(ChatColor.BLUE + "Area claimed in a radius of " + args[3] + " blocks!");
-								main.cds.put(sender.getName(), ClaimData.getInRegion(((Player) sender).getLocation()));
+								String claimArea = claimYmlFormat(select.getMinimumPoint(), select.getMaximumPoint());
+								claimYml.addClaim(claimArea, args[1], Arrays.asList(player.getName()));
+								playerYml.addClaim(claimArea, args[1], player);
+								player.sendMessage(ChatColor.BLUE + "Area claimed in a radius of " + args[3] + " blocks!");
+								main.updatePlayerRegion(player);
 								return true;
 							}
 							else if(args[2].equalsIgnoreCase("selection")) {
 								//Selection claim
-								World w = we.getSession(p).getSelectionWorld();
+								World w = we.getSession(player).getSelectionWorld();
 								if(w == null) {
 									sender.sendMessage(ChatColor.RED + "Make selection first !");
 									return true;
 								}
-								Region r = we.getSession(p).getSelection(w);
+								Region r = we.getSession(player).getSelection(w);
 								String claimArea = claimYmlFormat(BlockVector3.at(r.getMaximumPoint().getX(), 0, r.getMaximumPoint().getZ()), BlockVector3.at(r.getMinimumPoint().getX(), 400, r.getMinimumPoint().getBlockZ()));
-								main.claimsYml.get().set(claimArea+".name", args[1]);
-								main.claimsYml.get().set(claimArea+".owners", Arrays.asList(sender.getName()));
-								main.claimsYml.save();
-								sender.sendMessage(ChatColor.BLUE + "Selection claimed successfully!");
+								claimYml.addClaim(claimArea, args[1], Arrays.asList(player.getName()));
+								player.sendMessage(ChatColor.BLUE + "Selection claimed successfully!");
 								return true;
 							}
 							else {
@@ -147,7 +146,7 @@ public class CommandClaim implements CommandExecutor{
 							}
 						}
 						else {
-							p.sendMessage(ChatColor.DARK_RED+"You can't claim a claim !");
+							player.sendMessage(ChatColor.DARK_RED+"You can't claim a claim !");
 							return true;
 						}
 					}
@@ -157,43 +156,145 @@ public class CommandClaim implements CommandExecutor{
 					}
 				}
 				else if(args[0].equalsIgnoreCase("remove")) {
-					if(!p.hasPermission("claimPlugin.command.remove")) {
-						main.insufficientPerm(p, "claimPlugin.command.remove");
+					if(!player.hasPermission("claimPlugin.command.remove")) {
+						main.insufficientPerm(player, "claimPlugin.command.remove");
 						return true;
 					}
 					if(args.length > 1) {
 						//remove named claim
-						p.sendMessage(ChatColor.DARK_AQUA+"Work in progress ...");
+						if(playerYml.getClaimsByName(player).isEmpty()) {
+							player.sendMessage(ChatColor.GRAY+"You have no claims to remove.");
+							return true;
+						}
+						else if(playerYml.getClaim(args[1], player) == null) {
+							player.sendMessage(ChatColor.GRAY+"You have no claims named "+ChatColor.DARK_AQUA+args[1]);
+							return true;
+						}
+						String node = playerYml.getClaim(args[1], player);
+						claimYml.delClaim(node);
+						playerYml.delClaim(args[1], player);
+						player.sendMessage(ChatColor.GRAY+"Claim: "+ChatColor.GREEN+node+ChatColor.GRAY+" has been removed !");
+						main.updatePlayerRegion(player);
 					}
 					else {
 						//remove inClaim claim
-						ClaimData cd = null;
-						cd = ClaimData.getInRegion(p.getLocation());
-						if(cd != null) {
-							if(!main.containsIgnoringCase(cd.getOwners(), p.getName()) && !p.hasPermission("claimPlugin.others.remove")) {
-								sender.sendMessage(ChatColor.DARK_RED+"You're not allowed to remove this claim !");
-								main.insufficientPerm(p, "claimPlugin.others.remove");
-								return true;
-							}
-							main.claimsYml.get().set("regions."+cd.getNode(), null);
-							main.claimsYml.save();
-							main.playersYml.get().set(p.getName()+"."+cd.getName(), null);
-							main.playersYml.save();
-							main.cds.put(p.getName(), null);
-							sender.sendMessage(ChatColor.GRAY+"Claim: "+ChatColor.GREEN+cd.getNode()+ChatColor.GRAY+" has been removed !");
+						ClaimData cd = ClaimData.getInRegion(player.getLocation());
+						if(cd == null) {
+							player.sendMessage(ChatColor.DARK_RED+"No claim to remove here");
 						}
-						else {
-							sender.sendMessage(ChatColor.DARK_RED+"No claim to remove here");
+						if(!main.containsIgnoringCase(cd.getOwners(), player.getName()) && 
+								!player.hasPermission("claimPlugin.others.remove")) {
+							player.sendMessage(ChatColor.DARK_RED+"You're not allowed to remove this claim !");
+							main.insufficientPerm(player, "claimPlugin.others.remove");
+							return true;
 						}
+						claimYml.delClaim(cd.getNode());
+						playerYml.delClaim(cd.getName(), player);
+						main.updatePlayerRegion(player);
+						player.sendMessage(ChatColor.GRAY+"Claim: "+ChatColor.GREEN+cd.getNode()+ChatColor.GRAY+" has been removed !");
 						return true;
 					}
 				}
 				else if(args[0].equalsIgnoreCase("info")) {
-					if(!p.hasPermission("claimPlugin.command.info")) {
-						main.insufficientPerm(p, "claimPlugin.command.info");
+					if(!player.hasPermission("claimPlugin.command.info")) {
+						main.insufficientPerm(player, "claimPlugin.command.info");
 						return true;
 					}
-					dispClaimInfo(p);
+					dispClaimInfo(player);
+				}
+				else if(args[0].equalsIgnoreCase("list")) {
+					if(!player.hasPermission("claimPlugin.command.list")) {
+						main.insufficientPerm(player, "claimPlugin.command.list");
+						return true;
+					}
+					dispClaimList(player);
+				}
+				else if(args[0].equalsIgnoreCase("addOwner")) {
+					ChatColor textColor = ChatColor.GRAY;
+					ChatColor valueColor = ChatColor.GREEN;
+					if(!player.hasPermission("claimPlugin.command.addOwner")) {
+						main.insufficientPerm(player, "claimPlugin.command.addOwner");
+						return true;
+					}
+					if(args.length == 2) {
+						ClaimData cd = main.cds.get(player.getName());
+						if(cd == null) {
+							player.sendMessage(textColor+"You must be in a claim to add a player!");
+							return true;
+						}
+						if(!main.containsIgnoringCase(cd.getOwners(), player.getName())) {
+							player.sendMessage(textColor+"You must be in your claims to add a player!");
+							return true;
+						}
+						if(!main.containsIgnoringCase(Bukkit.getOnlinePlayers(), args[1])){
+							player.sendMessage(textColor+"There is no player "+valueColor+args[1]+textColor+" online.");
+							return true;
+						}
+						if(main.containsIgnoringCase(cd.getOwners(), args[1])) {
+							player.sendMessage(textColor+"Player "+valueColor+args[1]+textColor+" is already an owner of this claim!");
+							return true;
+						}
+						
+						Player addedPlayer = Bukkit.getPlayer(args[1]);
+						claimYml.addOwner(cd.getNode(), addedPlayer);
+						playerYml.addClaim(cd.getNode(), cd.getName(), addedPlayer);
+						main.updatePlayerRegion(player);
+						main.updatePlayerRegion(addedPlayer);
+						player.sendMessage(textColor+"Player "+valueColor+args[1]+textColor+" added to this claim!");
+						addedPlayer.sendMessage(valueColor+player.getName()+textColor+" add you as owner of "+valueColor+cd.getName()+textColor+" claim.");
+						return true;
+					}
+					else if(args.length > 2){
+						sender.sendMessage(ChatColor.DARK_RED + "Too many arguments");
+						return true;
+					}
+					else {
+						sender.sendMessage(ChatColor.DARK_RED + "Missing player name");
+						return true;
+					}
+				}
+				else if(args[0].equalsIgnoreCase("delOwner")) {
+					ChatColor textColor = ChatColor.GRAY;
+					ChatColor valueColor = ChatColor.GREEN;
+					if(!player.hasPermission("claimPlugin.command.delOwner")) {
+						main.insufficientPerm(player, "claimPlugin.command.delOwner");
+						return true;
+					}
+					if(args.length == 2) {
+						ClaimData cd = main.cds.get(player.getName());
+						if(cd == null) {
+							player.sendMessage(textColor+"You must be in a claim to remove a player!");
+							return true;
+						}
+						if(!main.containsIgnoringCase(cd.getOwners(), player.getName())) {
+							player.sendMessage(textColor+"You must be in your claims to remove a player!");
+							return true;
+						}
+						if(cd.getOwners().size() == 1) {
+							player.sendMessage(textColor+"There must have at least one owner in this claim!");
+							return true;
+						}
+						if(!main.containsIgnoringCase(cd.getOwners(), args[1])){
+							player.sendMessage(valueColor+args[1]+textColor+"is not a owner of this claim.");
+							return true;
+						}
+						Player removedPlayer = Bukkit.getPlayer(args[1]);
+						claimYml.delOwner(cd.getNode(), removedPlayer);
+						playerYml.delClaim(cd.getName(), removedPlayer);
+						main.updatePlayerRegion(player);
+						main.updatePlayerRegion(removedPlayer);
+						player.sendMessage(textColor+"Player "+valueColor+args[1]+" removed from this claim");
+						removedPlayer.sendMessage(valueColor+player.getName()+textColor+" remove you from "+valueColor+cd.getName()+textColor+" claim.");
+						return true;
+					}
+					else if(args.length > 2){
+						sender.sendMessage(ChatColor.DARK_RED + "Too many arguments");
+						return true;
+					}
+					else {
+						sender.sendMessage(ChatColor.DARK_RED + "Missing player name");
+						return true;
+					}
 				}
 				else {
 					sender.sendMessage(ChatColor.DARK_RED + "Invalid Argument");
@@ -204,7 +305,7 @@ public class CommandClaim implements CommandExecutor{
 			e.printStackTrace();
 		} catch (IncompleteRegionException e) {
 //			e.printStackTrace();
-			p.sendMessage(ChatColor.DARK_RED+"Incomplete selection");
+			player.sendMessage(ChatColor.DARK_RED+"Incomplete selection");
 		}
 		return true;
 	}
