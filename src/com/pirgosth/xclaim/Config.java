@@ -1,4 +1,4 @@
-package com.pirgosth.claimPlugin;
+package com.pirgosth.xclaim;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,16 +29,18 @@ public class Config {
 	}
 	
 	public void reload(){
+		//For default config file in project directory
+		if(plugin.getResource(path) != null) {
+			plugin.saveResource(path, false);
+		}
 		file = new File(plugin.getDataFolder(), path);
 		fileConfig = YamlConfiguration.loadConfiguration(file);
 		if(!file.exists()) {
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//			plugin.saveResource(path, false); //Use this to create yml from existing file.
 		}
 	}
 	

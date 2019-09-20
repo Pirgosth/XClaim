@@ -1,4 +1,4 @@
-package com.pirgosth.claimPlugin;
+package com.pirgosth.xclaim;
 
 @SuppressWarnings("serial")
 public class MissingPluginException extends Exception{

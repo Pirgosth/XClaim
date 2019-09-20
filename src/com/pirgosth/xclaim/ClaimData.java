@@ -1,4 +1,4 @@
-package com.pirgosth.claimPlugin;
+package com.pirgosth.xclaim;
 
 import java.util.List;
 import java.util.Set;
@@ -6,7 +6,7 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.pirgosth.claimPlugin.Coordinates.CoordinateFormatException;
+import com.pirgosth.xclaim.Coordinates.CoordinateFormatException;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
 public class ClaimData {

@@ -1,4 +1,4 @@
-package com.pirgosth.claimPlugin;
+package com.pirgosth.xclaim;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,8 +88,9 @@ public class CommandClaim implements CommandExecutor{
 			WorldEditPlugin we = WorldEditCatcher.getWorldEdit();
 			if(args.length > 0) {
 				if(args[0].equalsIgnoreCase("create")) {
-					if(!player.hasPermission("claimPlugin.command.create")) {
-						main.insufficientPerm(player, "claimPlugin.command.create");
+					if(!player.hasPermission("xclaim.command.create")) {
+						Messages.sendRestriction("on-command", player);
+//						main.insufficientPerm(player, "xclaim.command.create");
 						return true;
 					}
 					if(args.length > 2) {
@@ -156,8 +157,9 @@ public class CommandClaim implements CommandExecutor{
 					}
 				}
 				else if(args[0].equalsIgnoreCase("remove")) {
-					if(!player.hasPermission("claimPlugin.command.remove")) {
-						main.insufficientPerm(player, "claimPlugin.command.remove");
+					if(!player.hasPermission("xclaim.command.remove")) {
+						Messages.sendRestriction("on-command", player);
+//						main.insufficientPerm(player, "xclaim.command.remove");
 						return true;
 					}
 					if(args.length > 1) {
@@ -183,9 +185,9 @@ public class CommandClaim implements CommandExecutor{
 							player.sendMessage(ChatColor.DARK_RED+"No claim to remove here");
 						}
 						if(!main.containsIgnoringCase(cd.getOwners(), player.getName()) && 
-								!player.hasPermission("claimPlugin.others.remove")) {
+								!player.hasPermission("xclaim.others.remove")) {
 							player.sendMessage(ChatColor.DARK_RED+"You're not allowed to remove this claim !");
-							main.insufficientPerm(player, "claimPlugin.others.remove");
+//							main.insufficientPerm(player, "xclaim.others.remove");
 							return true;
 						}
 						claimYml.delClaim(cd.getNode());
@@ -196,15 +198,17 @@ public class CommandClaim implements CommandExecutor{
 					}
 				}
 				else if(args[0].equalsIgnoreCase("info")) {
-					if(!player.hasPermission("claimPlugin.command.info")) {
-						main.insufficientPerm(player, "claimPlugin.command.info");
+					if(!player.hasPermission("xclaim.command.info")) {
+						Messages.sendRestriction("on-command", player);
+//						main.insufficientPerm(player, "xclaim.command.info");
 						return true;
 					}
 					dispClaimInfo(player);
 				}
 				else if(args[0].equalsIgnoreCase("list")) {
-					if(!player.hasPermission("claimPlugin.command.list")) {
-						main.insufficientPerm(player, "claimPlugin.command.list");
+					if(!player.hasPermission("xclaim.command.list")) {
+						Messages.sendRestriction("on-command", player);
+//						main.insufficientPerm(player, "xclaim.command.list");
 						return true;
 					}
 					dispClaimList(player);
@@ -212,8 +216,9 @@ public class CommandClaim implements CommandExecutor{
 				else if(args[0].equalsIgnoreCase("addOwner")) {
 					ChatColor textColor = ChatColor.GRAY;
 					ChatColor valueColor = ChatColor.GREEN;
-					if(!player.hasPermission("claimPlugin.command.addOwner")) {
-						main.insufficientPerm(player, "claimPlugin.command.addOwner");
+					if(!player.hasPermission("xclaim.command.addOwner")) {
+						Messages.sendRestriction("on-command", player);
+//						main.insufficientPerm(player, "xclaim.command.addOwner");
 						return true;
 					}
 					if(args.length == 2) {
@@ -256,8 +261,9 @@ public class CommandClaim implements CommandExecutor{
 				else if(args[0].equalsIgnoreCase("delOwner")) {
 					ChatColor textColor = ChatColor.GRAY;
 					ChatColor valueColor = ChatColor.GREEN;
-					if(!player.hasPermission("claimPlugin.command.delOwner")) {
-						main.insufficientPerm(player, "claimPlugin.command.delOwner");
+					if(!player.hasPermission("xclaim.command.delOwner")) {
+						Messages.sendRestriction("on-command", player);
+//						main.insufficientPerm(player, "xclaim.command.delOwner");
 						return true;
 					}
 					if(args.length == 2) {

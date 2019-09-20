@@ -1,4 +1,4 @@
-package com.pirgosth.claimPlugin;
+package com.pirgosth.xclaim;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +20,7 @@ public class main extends JavaPlugin{
 	FileConfiguration config = null;
 	public static Config claimsYml = null;
 	public static Config playersYml = null;
+	public static Config messagesYml = null;
 	public static Map<String, ClaimData> cds = new HashMap<>();
 	public static void log(final String message) {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
@@ -28,7 +29,7 @@ public class main extends JavaPlugin{
 	public static void saveData(ConsoleCommandSender console) {
 		claimsYml.save();
 		playersYml.save();
-		console.sendMessage("[ClaimPlugin] Data saved");
+		console.sendMessage("[XClaim] Data saved");
 	}
 	
 	public static BlockVector3 Location2Vector(Location l) {
@@ -86,6 +87,8 @@ public class main extends JavaPlugin{
 		claimsYml.save();
 		playersYml = new Config("players.yml", this);
 		playersYml.save();
+		messagesYml = new Config("messages.yml", this);
+		messagesYml.save();
 		saveConfig();
 		
 		try {
@@ -104,7 +107,7 @@ public class main extends JavaPlugin{
 			updatePlayerRegion(player);
 		}
 		new YmlAutoSave(this).runTaskTimer(this, 200, 36000);
-		log("[ClaimPlugin]" + ChatColor.GREEN + "Plugin loaded !");
+		log("[XClaim]" + ChatColor.GREEN + "Plugin loaded !");
 	}
 
 	@Override

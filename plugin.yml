@@ -1,119 +1,119 @@
-name: ClaimPlugin
-main: com.pirgosth.claimPlugin.main
+name: XClaim
+main: com.pirgosth.xclaim.main
 version: 1.0
 api-version: 1.14
 depend: [WorldEdit]
 command-complete: true
 author: Pirgosth
 commands:
-  test:
-    description: La commande magique !
-    usage: /<command>
-    permission: claimPlugin.test
-    permission-message: You do not have permission to do that !
   claim:
     description: Claim a wild area
     usage: /<command>
 permissions:
-  claimPlugin.command.test:
-    description: Allow player to use test command
-    default: false
-  claimPlugin.command.create:
+  xclaim.command.create:
     description: Allow player to use create command
     default: false
-  claimPlugin.command.info:
+  xclaim.command.info:
     description: Allow player to use info command
     default: false
-  claimPlugin.command.remove:
+  xclaim.command.remove:
     description: Allow player to use remove command
     default: false
-  claimPlugin.command.addOwner:
+  xclaim.command.addOwner:
     description: Allow player to add a owner to a claim
     default: false
-  claimPlugin.command.delOwner:
+  xclaim.command.delOwner:
     description: Allow player to remove a owner from a claim
     default: false
-  claimPlugin.command.*:
+  xclaim.command.*:
     description: Allow player to use all commands
     default: false
     children:
-      claimPlugin.command.test: true
-      claimPlugin.command.create: true
-      claimPlugin.command.remove: true
-      claimPlugin.command.info: true
-      claimPlugin.command.addOwner: true
-      claimPlugin.command.delOwner: true
-  claimPlugin.others.remove:
+      xclaim.command.test: true
+      xclaim.command.create: true
+      xclaim.command.remove: true
+      xclaim.command.info: true
+      xclaim.command.addOwner: true
+      xclaim.command.delOwner: true
+  xclaim.others.remove:
     description: Allow player to remove others claims
     default: false
-  claimPlugin.others.blocks.break:
+  xclaim.others.blocks.break:
     description: Allow player to break blocks in others claims
     default: false
-  claimPlugin.others.blocks.place:
+  xclaim.others.blocks.place:
     description: Allow player to place blocks in others claims
     default: false
-  claimPlugin.others.entity.hit:
+  xclaim.others.entity.hit:
     description: Allow player to hit entity in others claims
     default: false
-  claimPlugin.others.interact:
+  xclaim.others.interact:
     description: Allow player to interact with others claims
     default: false
-  claimPlugin.others.tnt.damage.entities:
+  xclaim.others.interact.armorStand:
+    description: Allow player to pickup stuff on armorStand in others claims
+    default: false
+  xclaim.others.interact.paintings:
+    description: Allow player to remove paintings in others claims
+    default: false
+  xclaim.others.tnt.damage.entity:
     description: Allow player's tnts to damage others claims' entities
     default: false
-  claimPlugin.others.tnt.damage.blocks:
+  xclaim.others.tnt.damage.blocks:
     description: Allow player's tnts to destroy others claims' blocks
     default: false
-  claimPlugin.others.items.pickup:
+  xclaim.others.items.pickup:
     description: Allow player to pickup items in others claims
     default: false
-  claimPlugin.others.items.drop:
+  xclaim.others.items.drop:
     description: Allow player to drop items in others claims
     default: false
-  claimPlugin.others.entities.leash:
+  xclaim.others.entity.leash:
     description: Allow player to leash others claims' entities
     default: false
-  claimPlugin.others.entities.unleash:
+  xclaim.others.entity.unleash:
     description: Allow player to unleash others claims' entities
     default: false
-  claimPlugin.others.blocks.*:
+  xclaim.others.blocks.*:
     description: Allow player to place/break blocks in others claims
     default: false
     children:
-      claimPlugin.others.blocks.break: true
-      claimPlugin.others.blocks.place: true
-  claimPlugin.others.tnt.damage.*:
+      xclaim.others.blocks.break: true
+      xclaim.others.blocks.place: true
+  xclaim.others.tnt.damage.*:
     description: Allow player's tnts to damage others claims
     default: false
     children:
-      claimPlugin.others.tnt.damage.entities: true
-      claimPlugin.others.tnt.damage.blocks: true
-  claimPlugin.others.items.*:
+      xclaim.others.tnt.damage.entity: true
+      xclaim.others.tnt.damage.blocks: true
+  xclaim.others.items.*:
     description: Allow player to use items in others claims
     default: false
     children:
-      claimPlugin.others.items.pickup: true
-      claimPlugin.others.items.drop: true
-  claimPlugin.others.entities.*:
+      xclaim.others.items.pickup: true
+      xclaim.others.items.drop: true
+  xclaim.others.entity.*:
     description: Allow player to leash/unleash others claims' entities
     default: false
     children:
-      claimPlugin.others.entities.leash: true
-      claimPlugin.others.entities.unleash: true
-  claimPlugin.others.*:
+      xclaim.others.entity.leash: true
+      xclaim.others.entity.unleash: true
+  xclaim.others.*:
     description: Granted all others permissions to player
     default: false
     children:
-      claimPlugin.others.remove: true
-      claimPlugin.others.blocks.*: true
-      claimPlugin.others.entity.hit: true
-      claimPlugin.others.interact: true
-      claimPlugin.others.tnt.damage.*: true
-      claimPlugin.others.items.*: true
-      claimPlugin.others.entities.*: true
-  claimPlugin.*:
+      xclaim.others.remove: true
+      xclaim.others.blocks.*: true
+      xclaim.others.entity.hit: true
+      xclaim.others.interact: true
+      xclaim.others.interact.armorStand: true
+      xclaim.others.interact.paintings: true
+      xclaim.others.tnt.damage.*: true
+      xclaim.others.items.*: true
+      xclaim.others.entity.*: true
+  xclaim.*:
     description: Wildcard permission
     default: op
     children:
-      claimPlugin.command.*: true
-      claimPlugin.others.*: true
+      xclaim.command.*: true
+      xclaim.others.*: true
