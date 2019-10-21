@@ -10,9 +10,23 @@ import com.pirgosth.xclaim.Coordinates.CoordinateFormatException;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
 public class ClaimData {
+	public static void updatePlayerRegion(Player player) {
+		main.cds.put(player.getName(), ClaimData.getInRegion(player.getLocation(), player.getWorld().getName()));
+	}
 	
-	public static ClaimData getInRegion(Location location) {
-		Set<String> claims = main.claimsYml.get().getConfigurationSection("").getKeys(false);
+	public static ClaimData getPlayerRegion(Player player) {
+		return main.cds.get(player.getName());
+	}
+	
+	public static void setPlayerRegion(Player player, ClaimData cd) {
+		main.cds.put(player.getName(), cd);
+	}
+	
+	public static ClaimData getInRegion(Location location, String world) {
+		if(!main.worlds.get(world)) {
+			return null;
+		}
+		Set<String> claims = main.claimsYml.get(world).get().getConfigurationSection("").getKeys(false);
 		if(claims.size() == 0) {
 			return null;
 		}
@@ -21,8 +35,8 @@ public class ClaimData {
 			try {
 				co = Coordinates.extractCoordinates(claim);
 				CuboidRegion area = new CuboidRegion(co.pos1(), co.pos2());
-				if(area.contains(main.Location2Vector(location))) { //&& main.claimsYml.get().getStringList(claim+".owners").contains(player.getName())
-					return new ClaimData(co, claim, main.claimsYml.get().getString(claim+".name"), main.claimsYml.get().getStringList(claim+".owners"));
+				if(area.contains(Functions.Location2Vector(location))) { //&& main.claimsYml.get().getStringList(claim+".owners").contains(player.getName())
+					return new ClaimData(co, claim, main.claimsYml.get(world).get().getString(claim+".name"), main.claimsYml.get(world).get().getStringList(claim+".owners"));
 				}
 			} catch (CoordinateFormatException e) {
 				continue;
@@ -32,7 +46,7 @@ public class ClaimData {
 	}
 	
 	public static boolean isMemberOf(String node, Player player) {
-		return main.containsIgnoringCase(claimYml.getOwners(node), player.getName());
+		return Functions.containsIgnoringCase(ClaimYml.getOwners(player.getWorld().getName(), node), player.getName());
 	}
 	
 	private String node = "";

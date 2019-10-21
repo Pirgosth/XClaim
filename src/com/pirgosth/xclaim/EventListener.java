@@ -52,7 +52,7 @@ public class EventListener implements Listener{
 	}
 	
 	private boolean cancelInteract(Player player, Location location, String permission, String restriction) {
-		ClaimData cd = ClaimData.getInRegion(location);
+		ClaimData cd = ClaimData.getInRegion(location, player.getWorld().getName());
 		if(cd != null && !player.hasPermission(permission) && !ClaimData.isMemberOf(cd.getNode(), player)) {
 			Messages.sendRestriction(restriction, player);
 //			main.insufficientPerm(player, perm);
@@ -62,7 +62,7 @@ public class EventListener implements Listener{
 	}
 	
 	private boolean cancelInteract(Player player, Location location) {
-		ClaimData cd = ClaimData.getInRegion(location);
+		ClaimData cd = ClaimData.getInRegion(location, player.getWorld().getName());
 		if(cd != null && !ClaimData.isMemberOf(cd.getNode(), player)) {
 			return true;
 		}
@@ -71,17 +71,17 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		main.updatePlayerRegion(event.getPlayer());
+		ClaimData.updatePlayerRegion(event.getPlayer());
 	}
 	
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
 		//TODO FIX LEAVING/ENTERING MESSAGES
-		main.updatePlayerRegion(event.getPlayer());
+		ClaimData.updatePlayerRegion(event.getPlayer());
 	}
 	
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
 		//TODO FIX LEAVING/ENTERING MESSAGES
-		main.updatePlayerRegion(event.getPlayer());
+		ClaimData.updatePlayerRegion(event.getPlayer());
 	}
 	
 	@EventHandler
@@ -89,11 +89,11 @@ public class EventListener implements Listener{
 		if(event.getFrom().getX() != event.getTo().getX() || event.getFrom().getY() != event.getTo().getY() || 
 				event.getFrom().getZ() != event.getTo().getZ()) {
 			Player player = event.getPlayer();
-			ClaimData cd = main.getPlayerRegion(player);
+			ClaimData cd = ClaimData.getPlayerRegion(player);
 			if(cd == null) {
-				main.updatePlayerRegion(player);
-				if(cd != main.getPlayerRegion(player)) {
-					cd = main.getPlayerRegion(player);
+				ClaimData.updatePlayerRegion(player);
+				if(cd != ClaimData.getPlayerRegion(player)) {
+					cd = ClaimData.getPlayerRegion(player);
 					//On entering claim event
 					event.getPlayer().sendMessage(ChatColor.GRAY+"Welcome to "+ChatColor.GREEN+cd.getOwners()+ChatColor.GRAY+" <"+ChatColor.GREEN+cd.getName()+ChatColor.GRAY+"> claim !");
 				}
@@ -104,9 +104,9 @@ public class EventListener implements Listener{
 			if(cd != null) {
 				CuboidRegion r = cd.getRegion();
 				//On leaving claim event
-				if(!r.contains(main.Location2Vector(player.getLocation()))) {
+				if(!r.contains(Functions.Location2Vector(player.getLocation()))) {
 					player.sendMessage(ChatColor.GRAY+"You're leaving "+ChatColor.YELLOW+cd.getOwners()+ChatColor.GRAY+" <"+ChatColor.YELLOW+cd.getName()+ChatColor.GRAY+"> claim.");
-					main.setPlayerRegion(player, null);
+					ClaimData.setPlayerRegion(player, null);
 				}
 			}
 		}
@@ -164,7 +164,7 @@ public class EventListener implements Listener{
 		if(event.getHand() == EquipmentSlot.HAND) return;
 		if(event.getAction() != null && event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
 			event.setCancelled(cancelInteract(event.getPlayer(), event.getClickedBlock().getLocation(), "xclaim.others.interact", "on-others-interact"));
-			event.getPlayer().sendMessage("PlayerInteract event");	
+//			event.getPlayer().sendMessage("PlayerInteract event");	
 		}
 	}
 	
@@ -172,7 +172,7 @@ public class EventListener implements Listener{
 	public void onPlayerArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
 		//TODO ADD ARMOR STAND MANAGEMENT
 		event.setCancelled(cancelInteract(event.getPlayer(), event.getRightClicked().getLocation(), "xclaim.others.interact.armorStand", "on-others-interact"));
-		event.getPlayer().sendMessage("PlayerArmorStandManipulate event");
+//		event.getPlayer().sendMessage("PlayerArmorStandManipulate event");
 	}
 	
 	@EventHandler
@@ -196,7 +196,7 @@ public class EventListener implements Listener{
 		}
 		Entity entity = event.getRightClicked();
 		event.setCancelled(cancelInteract(event.getPlayer(), entity.getLocation(), "xclaim.others.interact", "on-others-interact"));
-		event.getPlayer().sendMessage("PlayerInteractEntity event");
+//		event.getPlayer().sendMessage("PlayerInteractEntity event");
 	}
 	
 	@EventHandler
@@ -204,7 +204,7 @@ public class EventListener implements Listener{
 		if(event.getEntity().getType() == EntityType.PRIMED_TNT) {
 			TntData tnt = TntData.getTntData(Tnts, event.getLocation());
 			if(tnt != null) {
-				tnt.getPlayer().sendMessage(ChatColor.DARK_AQUA+"Your tnt had been ignited !");
+//				tnt.getPlayer().sendMessage(ChatColor.DARK_AQUA+"Your tnt had been ignited !");
 				event.getEntity().setMetadata("player", new FixedMetadataValue(plugin, tnt.getPlayer().getName()));
 				Tnts.remove(tnt);
 			}
@@ -228,11 +228,11 @@ public class EventListener implements Listener{
 				if(block.getType() == Material.TNT) {
 					continue;
 				}
-				if(cd == null || !cd.getRegion().contains(main.Location2Vector(block.getLocation()))) {
-					cd = ClaimData.getInRegion(block.getLocation());
+				if(cd == null || !cd.getRegion().contains(Functions.Location2Vector(block.getLocation()))) {
+					cd = ClaimData.getInRegion(block.getLocation(), block.getWorld().getName());
 				}
 				if(cd != null) {
-					if(playerName != null && main.containsIgnoringCase(cd.getOwners(), playerName)) {
+					if(playerName != null && Functions.containsIgnoringCase(cd.getOwners(), playerName)) {
 						continue;
 					}
 					event.blockList().remove(block);
@@ -245,7 +245,7 @@ public class EventListener implements Listener{
 	public void onDamagedEntity(EntityDamageByEntityEvent event) {
 		if(event.getDamager() instanceof TNTPrimed) {
 			TNTPrimed tnt = (TNTPrimed)event.getDamager();
-			ClaimData cd = ClaimData.getInRegion(event.getEntity().getLocation());
+			ClaimData cd = ClaimData.getInRegion(event.getEntity().getLocation(), event.getEntity().getWorld().getName());
 			if(cd != null) {
 				if(tnt.hasMetadata("player")) {
 					Player player = Bukkit.getPlayer(tnt.getMetadata("player").get(0).asString());

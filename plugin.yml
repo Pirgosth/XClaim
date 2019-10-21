@@ -2,6 +2,7 @@ name: XClaim
 main: com.pirgosth.xclaim.main
 version: 1.0
 api-version: 1.14
+softdepend: [Multiverse-Core]
 depend: [WorldEdit]
 command-complete: true
 author: Pirgosth
@@ -25,6 +26,9 @@ permissions:
   xclaim.command.delOwner:
     description: Allow player to remove a owner from a claim
     default: false
+  xclaim.command.reload:
+    description: Allow player to reload all configuration files
+    default: false
   xclaim.command.*:
     description: Allow player to use all commands
     default: false
@@ -35,6 +39,7 @@ permissions:
       xclaim.command.info: true
       xclaim.command.addOwner: true
       xclaim.command.delOwner: true
+      xclaim.command.reload: true
   xclaim.others.remove:
     description: Allow player to remove others claims
     default: false
