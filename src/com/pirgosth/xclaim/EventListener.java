@@ -35,7 +35,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerUnleashEntityEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -118,19 +117,25 @@ public class EventListener implements Listener{
 	public void onEntityPickupItem(EntityPickupItemEvent event) {
 		if(event.getEntity() instanceof Player) {
 			Player player = (Player)event.getEntity();
-			event.setCancelled(cancelInteract(player, event.getItem().getLocation(), "xclaim.others.items.pickup", "on-others-items-pickup"));
+			if(cancelInteract(player, event.getItem().getLocation(), "xclaim.others.items.pickup", "on-others-items-pickup")) {
+				event.setCancelled(true);
+			}
 		}
 	}
 	
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent event) {
 		Player player = event.getPlayer();
-		event.setCancelled(cancelInteract(player, player.getLocation(), "xclaim.others.items.drop", "on-others-items-drop"));
+		if(cancelInteract(player, player.getLocation(), "xclaim.others.items.drop", "on-others-items-drop")) {
+			event.setCancelled(true);
+		}
 	}
 	
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
-		event.setCancelled(cancelInteract(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.break", "on-others-blocks-break"));
+		if(cancelInteract(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.break", "on-others-blocks-break")) {
+			event.setCancelled(true);
+		}
 	}
 	
 	@EventHandler
@@ -138,12 +143,16 @@ public class EventListener implements Listener{
 		if(event.getBlock().getType() == Material.TNT) {
 			Tnts.add(new TntData(event.getBlock().getLocation(), event.getPlayer()));
 		}
-		event.setCancelled(cancelInteract(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.place", "on-others-blocks-place"));
+		if(cancelInteract(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.place", "on-others-blocks-place")) {
+			event.setCancelled(true);
+		}
 	}
 	
 	@EventHandler
 	public void onPlayerLeashEntity(PlayerLeashEntityEvent event) {
-		event.setCancelled(cancelInteract(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.entity.leash", "on-others-entity-leash"));
+		if(cancelInteract(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.entity.leash", "on-others-entity-leash")) {
+			event.setCancelled(true);
+		}
 		event.getPlayer().updateInventory();
 	}
 	
@@ -161,9 +170,11 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		if(event.getHand() == EquipmentSlot.HAND) return;
+		//if(event.getHand() == EquipmentSlot.HAND) return;
 		if(event.getAction() != null && event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
-			event.setCancelled(cancelInteract(event.getPlayer(), event.getClickedBlock().getLocation(), "xclaim.others.interact", "on-others-interact"));
+			if(cancelInteract(event.getPlayer(), event.getClickedBlock().getLocation(), "xclaim.others.interact", "on-others-interact")) {
+				event.setCancelled(true);
+			}
 //			event.getPlayer().sendMessage("PlayerInteract event");	
 		}
 	}
@@ -171,13 +182,17 @@ public class EventListener implements Listener{
 	@EventHandler
 	public void onPlayerArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
 		//TODO ADD ARMOR STAND MANAGEMENT
-		event.setCancelled(cancelInteract(event.getPlayer(), event.getRightClicked().getLocation(), "xclaim.others.interact.armorStand", "on-others-interact"));
+		if(cancelInteract(event.getPlayer(), event.getRightClicked().getLocation(), "xclaim.others.interact.armorStand", "on-others-interact")) {
+			event.setCancelled(true);
+		}
 //		event.getPlayer().sendMessage("PlayerArmorStandManipulate event");
 	}
 	
 	@EventHandler
 	public void onHangingPlace(HangingPlaceEvent event) {
-		event.setCancelled(cancelInteract(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.place", "on-others-interact"));
+		if(cancelInteract(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.place", "on-others-interact")) {
+			event.setCancelled(true);
+		}
 		event.getPlayer().updateInventory();
 	}
 	
@@ -185,7 +200,9 @@ public class EventListener implements Listener{
 	public void onHangingBreakByEntity(HangingBreakByEntityEvent event) {
 		//TODO ADD HANGING BREAK MANAGEMENT
 		if(event.getRemover() instanceof Player) {
-			event.setCancelled(cancelInteract((Player)(event).getRemover(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.break", "on-others-interact"));	
+			if(cancelInteract((Player)(event).getRemover(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.break", "on-others-interact")) {
+				event.setCancelled(true);	
+			}
 		}
 	}
 	
@@ -195,7 +212,9 @@ public class EventListener implements Listener{
 			return;
 		}
 		Entity entity = event.getRightClicked();
-		event.setCancelled(cancelInteract(event.getPlayer(), entity.getLocation(), "xclaim.others.interact", "on-others-interact"));
+		if(cancelInteract(event.getPlayer(), entity.getLocation(), "xclaim.others.interact", "on-others-interact")) {
+			event.setCancelled(true);
+		}
 //		event.getPlayer().sendMessage("PlayerInteractEntity event");
 	}
 	
@@ -252,8 +271,8 @@ public class EventListener implements Listener{
 					if(player != null && player.hasPermission("xclaim.others.tnt.damage.entity")) {
 						return;
 					}
-					else {
-						event.setCancelled(cancelInteract(player, event.getEntity().getLocation()));
+					else if(cancelInteract(player, event.getEntity().getLocation())){
+						event.setCancelled(true);
 					}
 				}
 				event.setCancelled(true);
@@ -266,7 +285,9 @@ public class EventListener implements Listener{
 			Entity entity = event.getEntity();
 			Player damager = (Player)event.getDamager();
 			if(!damager.hasPermission("xclaim.others.entity.hit")) {
-				event.setCancelled(cancelInteract(damager, entity.getLocation(), "xclaim.others.entity.hit", "on-others-entity-hit"));
+				if(cancelInteract(damager, entity.getLocation(), "xclaim.others.entity.hit", "on-others-entity-hit")) {
+					event.setCancelled(true);
+				}
 			}
 		}
 	}

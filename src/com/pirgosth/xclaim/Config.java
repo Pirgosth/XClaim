@@ -38,12 +38,12 @@ public class Config {
 	
 	public void reload(){
 		//For default config file in project directory
+		if(plugin.getResource(path) != null) {
+			plugin.saveResource(path, false);
+		}
 		file = new File(plugin.getDataFolder(), path);
 		fileConfig = YamlConfiguration.loadConfiguration(file);
 		if(!file.exists()) {
-			if(plugin.getResource(path) != null) {
-				plugin.saveResource(path, false);
-			}
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
