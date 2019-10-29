@@ -20,8 +20,10 @@ public class main extends JavaPlugin{
 	
 	@Override
 	public void onEnable() {
+		config = this.getConfig();
+		config.options().copyDefaults(true);
 		Data.load(this);
-		
+		Data.save(this);
 		try {
 			WorldEditCatcher.getWorldEdit();
 		}
@@ -44,6 +46,6 @@ public class main extends JavaPlugin{
 
 	@Override
 	public void onDisable() {
-		Data.save(getServer().getConsoleSender(), false);
+		Data.save(this);
 	}
 }

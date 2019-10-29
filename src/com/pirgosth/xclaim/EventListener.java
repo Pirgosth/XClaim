@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -50,71 +49,92 @@ public class EventListener implements Listener{
 		this.plugin = plugin;
 	}
 	
-	private boolean cancelInteract(Player player, Location location, String permission, String restriction) {
-		ClaimData cd = ClaimData.getInRegion(location, player.getWorld().getName());
-		if(cd != null && !player.hasPermission(permission) && !ClaimData.isMemberOf(cd.getNode(), player)) {
-			Messages.sendRestriction(restriction, player);
-//			main.insufficientPerm(player, perm);
-			return true;
-		}
-		return false;
-	}
-	
 	private boolean cancelInteract(Player player, Location location) {
 		ClaimData cd = ClaimData.getInRegion(location, player.getWorld().getName());
-		if(cd != null && !ClaimData.isMemberOf(cd.getNode(), player)) {
+		if(cd != null && !cd.isOwnerOf(player) && !cd.isMemberOf(player)) {
 			return true;
 		}
 		return false;
 	}
 	
-	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent event) {
-		ClaimData.updatePlayerRegion(event.getPlayer());
+	private boolean cancelInteract(Player player, Location location, String permission, String restriction) {
+		boolean cancel = cancelInteract(player, location);
+		if(cancel && !player.hasPermission(permission)) {
+			Messages.sendRestriction(restriction, player);
+			return true;
+		}
+		return false;
 	}
 	
-	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		//TODO FIX LEAVING/ENTERING MESSAGES
-		ClaimData.updatePlayerRegion(event.getPlayer());
+	private boolean isWorldEnabled(Entity entity) {
+		return main.worlds.get(entity.getWorld().getName());
 	}
 	
-	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		//TODO FIX LEAVING/ENTERING MESSAGES
-		ClaimData.updatePlayerRegion(event.getPlayer());
+	private boolean isWorldEnabled(Block block) {
+		return main.worlds.get(block.getWorld().getName());
 	}
 	
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
-		if(event.getFrom().getX() != event.getTo().getX() || event.getFrom().getY() != event.getTo().getY() || 
-				event.getFrom().getZ() != event.getTo().getZ()) {
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
+		if(event.getFrom().getX() != event.getTo().getX() || event.getFrom().getZ() != event.getTo().getZ()) {
 			Player player = event.getPlayer();
 			ClaimData cd = ClaimData.getPlayerRegion(player);
 			if(cd == null) {
 				ClaimData.updatePlayerRegion(player);
-				if(cd != ClaimData.getPlayerRegion(player)) {
-					cd = ClaimData.getPlayerRegion(player);
+				cd = ClaimData.getPlayerRegion(player);
+				if(cd != null) {
 					//On entering claim event
-					event.getPlayer().sendMessage(ChatColor.GRAY+"Welcome to "+ChatColor.GREEN+cd.getOwners()+ChatColor.GRAY+" <"+ChatColor.GREEN+cd.getName()+ChatColor.GRAY+"> claim !");
-				}
-				else {
+					Messages.sendInformation("on-claim-entry", player, cd.getName(), cd.getOwners().toString());
 					return;
 				}
 			}
-			if(cd != null) {
+			else{
 				CuboidRegion r = cd.getRegion();
 				//On leaving claim event
-				if(!r.contains(Functions.Location2Vector(player.getLocation()))) {
-					player.sendMessage(ChatColor.GRAY+"You're leaving "+ChatColor.YELLOW+cd.getOwners()+ChatColor.GRAY+" <"+ChatColor.YELLOW+cd.getName()+ChatColor.GRAY+"> claim.");
+				if(!r.contains(Functions.Location2Vector(player.getLocation()))) {//If no more in old claim
+					Messages.sendInformation("on-claim-exit", player, cd.getName(), cd.getOwners().toString());
 					ClaimData.setPlayerRegion(player, null);
 				}
 			}
 		}
 	}
 	
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent event) {
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
+		ClaimData.updatePlayerRegion(event.getPlayer());
+	}
+	
+	@EventHandler
+	public void onPlayerRespawn(PlayerRespawnEvent event) {
+		//TODO FIX LEAVING/ENTERING MESSAGES
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
+		ClaimData.updatePlayerRegion(event.getPlayer());
+	}
+	
+	@EventHandler
+	public void onPlayerTeleport(PlayerTeleportEvent event) {
+		//TODO FIX LEAVING/ENTERING MESSAGES
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
+		ClaimData.updatePlayerRegion(event.getPlayer(), event.getTo());
+	}
+	
 	private Set<TntData> Tnts = new HashSet<>();
 	
 	@EventHandler
 	public void onEntityPickupItem(EntityPickupItemEvent event) {
+		if(!isWorldEnabled(event.getEntity())) {
+			return;
+		}
 		if(event.getEntity() instanceof Player) {
 			Player player = (Player)event.getEntity();
 			if(cancelInteract(player, event.getItem().getLocation(), "xclaim.others.items.pickup", "on-others-items-pickup")) {
@@ -125,6 +145,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent event) {
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
 		Player player = event.getPlayer();
 		if(cancelInteract(player, player.getLocation(), "xclaim.others.items.drop", "on-others-items-drop")) {
 			event.setCancelled(true);
@@ -133,6 +156,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
+		if(!isWorldEnabled(event.getBlock())) {
+			return;
+		}
 		if(cancelInteract(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.break", "on-others-blocks-break")) {
 			event.setCancelled(true);
 		}
@@ -140,6 +166,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent event) {
+		if(!isWorldEnabled(event.getBlock())) {
+			return;
+		}
 		if(event.getBlock().getType() == Material.TNT) {
 			Tnts.add(new TntData(event.getBlock().getLocation(), event.getPlayer()));
 		}
@@ -150,6 +179,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerLeashEntity(PlayerLeashEntityEvent event) {
+		if(!isWorldEnabled(event.getEntity())) {
+			return;
+		}
 		if(cancelInteract(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.entity.leash", "on-others-entity-leash")) {
 			event.setCancelled(true);
 		}
@@ -158,6 +190,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerUnleashEntity(PlayerUnleashEntityEvent event) {
+		if(!isWorldEnabled(event.getEntity())) {
+			return;
+		}
 		event.setCancelled(true);
 		Player player = event.getPlayer();
 		boolean isCancelled = cancelInteract(player, event.getEntity().getLocation(), "xclaim.others.entity.unleash", "on-others-entity-unleash");
@@ -170,6 +205,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
 		//if(event.getHand() == EquipmentSlot.HAND) return;
 		if(event.getAction() != null && event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
 			if(cancelInteract(event.getPlayer(), event.getClickedBlock().getLocation(), "xclaim.others.interact", "on-others-interact")) {
@@ -181,6 +219,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
 		//TODO ADD ARMOR STAND MANAGEMENT
 		if(cancelInteract(event.getPlayer(), event.getRightClicked().getLocation(), "xclaim.others.interact.armorStand", "on-others-interact")) {
 			event.setCancelled(true);
@@ -190,6 +231,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onHangingPlace(HangingPlaceEvent event) {
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
 		if(cancelInteract(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.place", "on-others-interact")) {
 			event.setCancelled(true);
 		}
@@ -198,6 +242,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onHangingBreakByEntity(HangingBreakByEntityEvent event) {
+		if(!isWorldEnabled(event.getEntity())) {
+			return;
+		}
 		//TODO ADD HANGING BREAK MANAGEMENT
 		if(event.getRemover() instanceof Player) {
 			if(cancelInteract((Player)(event).getRemover(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.break", "on-others-interact")) {
@@ -208,6 +255,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+		if(!isWorldEnabled(event.getPlayer())) {
+			return;
+		}
 		if(event.getPlayer().getInventory().getItemInMainHand().getType() == Material.LEAD) {
 			return;
 		}
@@ -220,6 +270,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onEntitySpawn(EntitySpawnEvent event) {
+		if(!isWorldEnabled(event.getEntity())) {
+			return;
+		}
 		if(event.getEntity().getType() == EntityType.PRIMED_TNT) {
 			TntData tnt = TntData.getTntData(Tnts, event.getLocation());
 			if(tnt != null) {
@@ -232,6 +285,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onBlockExplodedEvent(EntityExplodeEvent event) {
+		if(!isWorldEnabled(event.getEntity())) {
+			return;
+		}
 		if(event.getEntity() instanceof TNTPrimed) {
 			TNTPrimed tnt = (TNTPrimed) event.getEntity();
 			String playerName = null;
@@ -262,6 +318,9 @@ public class EventListener implements Listener{
 	
 	@EventHandler
 	public void onDamagedEntity(EntityDamageByEntityEvent event) {
+		if(!isWorldEnabled(event.getEntity())) {
+			return;
+		}
 		if(event.getDamager() instanceof TNTPrimed) {
 			TNTPrimed tnt = (TNTPrimed)event.getDamager();
 			ClaimData cd = ClaimData.getInRegion(event.getEntity().getLocation(), event.getEntity().getWorld().getName());

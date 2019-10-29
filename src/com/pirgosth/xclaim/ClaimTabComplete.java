@@ -23,49 +23,67 @@ public class ClaimTabComplete implements TabCompleter{
 		Player player = (Player)sender;
 		String world = player.getWorld().getName();
 		
-		if(!main.worlds.get(world)) {
-			return new ArrayList<String>();
-		}
+		if(main.worlds.get(world)) {
 		
-		if(args.length == 1){
-			final List<String> completions = new ArrayList<>();
-			StringUtil.copyPartialMatches(args[0], Arrays.asList("addMember", "addOwner", "create", "delMember", "delOwner", "info", "list", "remove", "reload"), completions);
-			return completions;
-		}
-		else if(args.length == 2 && args[0].equalsIgnoreCase("remove")) {
-			if(main.playersYml.get(world).get().getConfigurationSection(sender.getName()+".claims") == null) {
+			if(args.length == 1){
+				final List<String> completions = new ArrayList<>();
+				StringUtil.copyPartialMatches(args[0], Arrays.asList("addOwner", "addMember", "create", "delOwner", "delMember", "info", "leave", "list", "remove", "reload", "home", "sethome"), completions);
+				return completions;
+			}
+			else if(args.length == 2 && args[0].equalsIgnoreCase("remove")) {
+				if(main.playersYml.get(world).get().getConfigurationSection(sender.getName()+".claims") == null) {
+					return new ArrayList<String>();
+				}
+				final List<String> completions = new ArrayList<>();
+				StringUtil.copyPartialMatches(args[1], new ArrayList<String>(main.playersYml.get(world).get().getConfigurationSection(sender.getName()+".claims").getKeys(false)), completions);
+				return completions;
+			}
+			else if(args.length == 2 && args[0].equalsIgnoreCase("home")) {
+				if(main.playersYml.get(world).get().getConfigurationSection(sender.getName()+".claims") == null) {
+					return new ArrayList<String>();
+				}
+				final List<String> completions = new ArrayList<>();
+				StringUtil.copyPartialMatches(args[1], new ArrayList<String>(main.playersYml.get(world).get().getConfigurationSection(sender.getName()+".claims").getKeys(false)), completions);
+				return completions;
+			}
+			else if(args.length == 2 && (args[0].equalsIgnoreCase("addOwner") || args[0].equalsIgnoreCase("addMember"))) {
+				final Collection<? extends Player> online = Bukkit.getOnlinePlayers();
+				ArrayList<String> players = new ArrayList<String>();
+				for(Player p: online) {
+					players.add(p.getName());
+				}
+				final List<String> completions = new ArrayList<>();
+				StringUtil.copyPartialMatches(args[1], players, completions);
+				return completions;
+			}
+			else if(args.length == 2 && args[0].equalsIgnoreCase("delOwner")) {
+				if(main.cds.get(sender.getName()) == null || !Functions.containsIgnoringCase(main.cds.get(sender.getName()).getOwners(), sender.getName())) {
+					return new ArrayList<String>();
+				}
+				final List<String> completions = new ArrayList<>();
+				StringUtil.copyPartialMatches(args[1], main.cds.get(sender.getName()).getOwners(), completions);
+				return completions;
+			}
+			else if(args.length == 2 && args[0].equalsIgnoreCase("delMember")) {
+				if(main.cds.get(sender.getName()) == null || !Functions.containsIgnoringCase(main.cds.get(sender.getName()).getOwners(), sender.getName())) {
+					return new ArrayList<String>();
+				}
+				final List<String> completions = new ArrayList<>();
+				StringUtil.copyPartialMatches(args[1], main.cds.get(sender.getName()).getMembers(), completions);
+				return completions;
+			}
+			else {
 				return new ArrayList<String>();
 			}
-			final List<String> completions = new ArrayList<>();
-			StringUtil.copyPartialMatches(args[1], new ArrayList<String>(main.playersYml.get(world).get().getConfigurationSection(sender.getName()+".claims").getKeys(false)), completions);
-			return completions;
-		}
-		else if(args.length == 2 && args[0].equalsIgnoreCase("addOwner")) {
-			final Collection<? extends Player> online = Bukkit.getOnlinePlayers();
-			ArrayList<String> players = new ArrayList<String>();
-			for(Player p: online) {
-				players.add(p.getName());
-			}
-			final List<String> completions = new ArrayList<>();
-			StringUtil.copyPartialMatches(args[1], players, completions);
-			return completions;
-		}
-		else if(args.length == 2 && args[0].equalsIgnoreCase("delOwner")) {
-			if(main.cds.get(sender.getName()) == null || !Functions.containsIgnoringCase(main.cds.get(sender.getName()).getOwners(), sender.getName())) {
-				return new ArrayList<String>();
-			}
-			final List<String> completions = new ArrayList<>();
-			StringUtil.copyPartialMatches(args[1], main.cds.get(sender.getName()).getOwners(), completions);
-			return completions;
-		}
-		else if(args.length == 3 && args[0].equalsIgnoreCase("create")) {
-			final List<String> completions = new ArrayList<>();
-			StringUtil.copyPartialMatches(args[2], Arrays.asList("cuboid", "selection"), completions);
-			return completions;
 		}
 		else {
-			return new ArrayList<String>();
+			if(args.length == 1){
+				final List<String> completions = new ArrayList<>();
+				StringUtil.copyPartialMatches(args[0], Arrays.asList("reload"), completions);
+				return completions;
+			}
 		}
+		return new ArrayList<String>();
 	}
 
 }

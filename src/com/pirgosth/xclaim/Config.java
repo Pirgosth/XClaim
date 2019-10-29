@@ -38,10 +38,10 @@ public class Config {
 	
 	public void reload(){
 		//For default config file in project directory
-		if(plugin.getResource(path) != null) {
+		file = new File(plugin.getDataFolder(), path);
+		if(!file.exists() && plugin.getResource(path) != null) {
 			plugin.saveResource(path, false);
 		}
-		file = new File(plugin.getDataFolder(), path);
 		fileConfig = YamlConfiguration.loadConfiguration(file);
 		if(!file.exists()) {
 			try {

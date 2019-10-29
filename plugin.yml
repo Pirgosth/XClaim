@@ -17,14 +17,29 @@ permissions:
   xclaim.command.info:
     description: Allow player to use info command
     default: false
+  xclaim.command.home:
+    description: Allow player to use home command
+    default: false
+  xclaim.command.sethome:
+    description: Allow player to use sethome command
+    default: false
   xclaim.command.remove:
     description: Allow player to use remove command
     default: false
   xclaim.command.addOwner:
-    description: Allow player to add a owner to a claim
+    description: Allow player to add an owner to a claim
     default: false
   xclaim.command.delOwner:
-    description: Allow player to remove a owner from a claim
+    description: Allow player to remove an owner from a claim
+    default: false
+  xclaim.command.addMember:
+    description: Allow player to add a member to a claim
+    default: false
+  xclaim.command.delMember:
+    description: Allow player to remove a member from a claim
+    default: false
+  xclaim.command.leave:
+    description: Allow player to leave a claim
     default: false
   xclaim.command.reload:
     description: Allow player to reload all configuration files
@@ -33,12 +48,16 @@ permissions:
     description: Allow player to use all commands
     default: false
     children:
-      xclaim.command.test: true
       xclaim.command.create: true
+      xclaim.command.home: true
+      xclaim.command.sethome: true
       xclaim.command.remove: true
       xclaim.command.info: true
       xclaim.command.addOwner: true
       xclaim.command.delOwner: true
+      xclaim.command.addMember: true
+      xclaim.command.delMember: true
+      xclaim.command.leave: true
       xclaim.command.reload: true
   xclaim.others.remove:
     description: Allow player to remove others claims
@@ -116,9 +135,22 @@ permissions:
       xclaim.others.tnt.damage.*: true
       xclaim.others.items.*: true
       xclaim.others.entity.*: true
+  xclaim.claims.count.unlimited:
+    description: Allow player to create unlimited amount of claims
+    default: false
+  xclaim.claims.range.unlimited:
+    description: Allow player to create claims with unlimited range
+    default: false
+  xclaim.claims.*:
+    description: Granted all claims permissions
+    default: false
+    children:
+      xclaim.claims.count.unlimited: true
+      xclaim.claims.range.unlimited: true
   xclaim.*:
     description: Wildcard permission
     default: op
     children:
       xclaim.command.*: true
       xclaim.others.*: true
+      xclaim.claims.*: true
