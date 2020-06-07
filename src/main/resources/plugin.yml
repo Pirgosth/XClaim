@@ -1,6 +1,6 @@
 name: XClaim
-main: com.pirgosth.xclaim.main
-version: 1.0
+main: io.github.pirgosth.xclaim.XClaim
+version: 1.1
 api-version: 1.15
 softdepend: [Multiverse-Core]
 depend: [WorldEdit, WorldGuard]
@@ -71,6 +71,12 @@ permissions:
   xclaim.others.entity.hit:
     description: Allow player to hit entity in others claims
     default: false
+  xclaim.others.entity.arrow:
+    description: Allow player to shoot entity in others claims
+    default: false
+  xclaim.others.bow:
+    description: Allow player to use bows in others claims
+    default: false
   xclaim.others.interact:
     description: Allow player to interact with others claims
     default: false
@@ -79,6 +85,9 @@ permissions:
     default: false
   xclaim.others.interact.paintings:
     description: Allow player to remove paintings in others claims
+    default: false
+  xclaim.others.farmland.break:
+    description: Allow player to break farmland in others claims
     default: false
   xclaim.others.tnt.damage.entity:
     description: Allow player's tnts to damage others claims' entities
@@ -129,9 +138,12 @@ permissions:
       xclaim.others.remove: true
       xclaim.others.blocks.*: true
       xclaim.others.entity.hit: true
+      xclaim.others.entity.arrow: true
+      xclaim.others.bow: true
       xclaim.others.interact: true
       xclaim.others.interact.armorStand: true
       xclaim.others.interact.paintings: true
+      xclaim.others.farmland.break: true
       xclaim.others.tnt.damage.*: true
       xclaim.others.items.*: true
       xclaim.others.entity.*: true

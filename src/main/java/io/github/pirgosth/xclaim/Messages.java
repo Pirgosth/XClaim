@@ -1,4 +1,4 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -6,13 +6,13 @@ import org.bukkit.entity.Player;
 
 public class Messages {
 	public static String getRestriction(String restriction) {
-		return main.messagesYml.get().getString("restrictions."+restriction) != null ? 
-				main.messagesYml.get().getString("restrictions."+restriction): ChatColor.DARK_RED+"No restriction: "+ChatColor.GRAY+restriction+ChatColor.DARK_RED+" found";
+		return XClaim.messagesYml.get().getString("restrictions."+restriction) != null ? 
+				XClaim.messagesYml.get().getString("restrictions."+restriction): ChatColor.DARK_RED+"No restriction: "+ChatColor.GRAY+restriction+ChatColor.DARK_RED+" found";
 	}
 	
 	public static String getInformation(String information) {
-		return main.messagesYml.get().getString("informations."+information) != null ? 
-				main.messagesYml.get().getString("informations."+information): ChatColor.DARK_RED+"No information: "+ChatColor.GRAY+information+ChatColor.DARK_RED+" found";
+		return XClaim.messagesYml.get().getString("informations."+information) != null ? 
+				XClaim.messagesYml.get().getString("informations."+information): ChatColor.DARK_RED+"No information: "+ChatColor.GRAY+information+ChatColor.DARK_RED+" found";
 	}
 	
 	public static void sendRestriction(String restriction, Player player) {

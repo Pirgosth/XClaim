@@ -1,4 +1,4 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class main extends JavaPlugin{
+public class XClaim extends JavaPlugin{
 	public static FileConfiguration config = null;
 	public static Config messagesYml = null;
 	public static Config worldsYml = null;
@@ -24,14 +24,6 @@ public class main extends JavaPlugin{
 		config.options().copyDefaults(true);
 		Data.load(this);
 		Data.save(this);
-		try {
-			WorldEditCatcher.getWorldEdit();
-		}
-		catch(MissingPluginException t){
-			Functions.log("[ERROR]: "+ChatColor.RED + t.getMessage());
-			getServer().getPluginManager().disablePlugin(this);
-			return;
-		}
 		
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 		getCommand("claim").setExecutor(new CommandClaim());

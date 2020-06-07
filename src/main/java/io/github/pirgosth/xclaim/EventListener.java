@@ -1,17 +1,22 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,7 +26,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
@@ -44,12 +51,28 @@ public class EventListener implements Listener{
 	//TODO ADD RECENT REGION IN CDS TO AVOID RECALCULATE REGION ON EVERY SINGLE EVENT
 	//TODO CLARIFY CODE
 	private JavaPlugin plugin = null;
+	
+	private Map<UUID, Long> messageTimeouts = new HashMap<>();
 
 	public EventListener(JavaPlugin plugin) {
 		this.plugin = plugin;
 	}
 	
-	private boolean cancelInteract(Player player, Location location) {
+	private boolean canSendMessage(Player player, long timeout) {
+		if(!this.messageTimeouts.containsKey(player.getUniqueId())) {
+			this.messageTimeouts.put(player.getUniqueId(), System.currentTimeMillis());
+			return true;
+		}
+		long lastTime = this.messageTimeouts.get(player.getUniqueId());
+		long currentTime = System.currentTimeMillis();
+		if(currentTime - lastTime > timeout) {
+			this.messageTimeouts.put(player.getUniqueId(), currentTime);
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean cancelEvent(Player player, Location location) {
 		ClaimData cd = ClaimData.getInRegion(location, player.getWorld().getName());
 		if(cd != null && !cd.isOwnerOf(player) && !cd.isMemberOf(player)) {
 			return true;
@@ -57,21 +80,23 @@ public class EventListener implements Listener{
 		return false;
 	}
 	
-	private boolean cancelInteract(Player player, Location location, String permission, String restriction) {
-		boolean cancel = cancelInteract(player, location);
+	private boolean cancelEvent(Player player, Location location, String permission, String restriction) {
+		boolean cancel = cancelEvent(player, location);
 		if(cancel && !player.hasPermission(permission)) {
-			Messages.sendRestriction(restriction, player);
+			if(this.canSendMessage(player, 2000)) {
+				Messages.sendRestriction(restriction, player);
+			}
 			return true;
 		}
 		return false;
 	}
 	
 	private boolean isWorldEnabled(Entity entity) {
-		return main.worlds.get(entity.getWorld().getName());
+		return XClaim.worlds.get(entity.getWorld().getName());
 	}
 	
 	private boolean isWorldEnabled(Block block) {
-		return main.worlds.get(block.getWorld().getName());
+		return XClaim.worlds.get(block.getWorld().getName());
 	}
 	
 	@EventHandler
@@ -137,7 +162,7 @@ public class EventListener implements Listener{
 		}
 		if(event.getEntity() instanceof Player) {
 			Player player = (Player)event.getEntity();
-			if(cancelInteract(player, event.getItem().getLocation(), "xclaim.others.items.pickup", "on-others-items-pickup")) {
+			if(cancelEvent(player, event.getItem().getLocation(), "xclaim.others.items.pickup", "on-others-items-pickup")) {
 				event.setCancelled(true);
 			}
 		}
@@ -149,7 +174,7 @@ public class EventListener implements Listener{
 			return;
 		}
 		Player player = event.getPlayer();
-		if(cancelInteract(player, player.getLocation(), "xclaim.others.items.drop", "on-others-items-drop")) {
+		if(cancelEvent(player, player.getLocation(), "xclaim.others.items.drop", "on-others-items-drop")) {
 			event.setCancelled(true);
 		}
 	}
@@ -159,7 +184,7 @@ public class EventListener implements Listener{
 		if(!isWorldEnabled(event.getBlock())) {
 			return;
 		}
-		if(cancelInteract(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.break", "on-others-blocks-break")) {
+		if(cancelEvent(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.break", "on-others-blocks-break")) {
 			event.setCancelled(true);
 		}
 	}
@@ -172,7 +197,7 @@ public class EventListener implements Listener{
 		if(event.getBlock().getType() == Material.TNT) {
 			Tnts.add(new TntData(event.getBlock().getLocation(), event.getPlayer()));
 		}
-		if(cancelInteract(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.place", "on-others-blocks-place")) {
+		if(cancelEvent(event.getPlayer(), event.getBlock().getLocation(), "xclaim.others.blocks.place", "on-others-blocks-place")) {
 			event.setCancelled(true);
 		}
 	}
@@ -182,7 +207,7 @@ public class EventListener implements Listener{
 		if(!isWorldEnabled(event.getEntity())) {
 			return;
 		}
-		if(cancelInteract(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.entity.leash", "on-others-entity-leash")) {
+		if(cancelEvent(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.entity.leash", "on-others-entity-leash")) {
 			event.setCancelled(true);
 		}
 		event.getPlayer().updateInventory();
@@ -195,7 +220,7 @@ public class EventListener implements Listener{
 		}
 		event.setCancelled(true);
 		Player player = event.getPlayer();
-		boolean isCancelled = cancelInteract(player, event.getEntity().getLocation(), "xclaim.others.entity.unleash", "on-others-entity-unleash");
+		boolean isCancelled = cancelEvent(player, event.getEntity().getLocation(), "xclaim.others.entity.unleash", "on-others-entity-unleash");
 		if(!isCancelled) {
 			LivingEntity entity = (LivingEntity)event.getEntity();
 			entity.setLeashHolder(null);
@@ -209,11 +234,16 @@ public class EventListener implements Listener{
 			return;
 		}
 		//if(event.getHand() == EquipmentSlot.HAND) return;
-		if(event.getAction() != null && event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
-			if(cancelInteract(event.getPlayer(), event.getClickedBlock().getLocation(), "xclaim.others.interact", "on-others-interact")) {
+		if(event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
+			if(cancelEvent(event.getPlayer(), event.getClickedBlock().getLocation(), "xclaim.others.interact", "on-others-interact")) {
 				event.setCancelled(true);
 			}
 //			event.getPlayer().sendMessage("PlayerInteract event");	
+		}
+		else if(event.getAction() == Action.PHYSICAL && event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.FARMLAND) {
+			if(cancelEvent(event.getPlayer(), event.getClickedBlock().getLocation(), "xclaim.others.farmland.break", "on-other-farmland-break")) {
+				event.setCancelled(true);
+			}
 		}
 	}
 	
@@ -223,7 +253,7 @@ public class EventListener implements Listener{
 			return;
 		}
 		//TODO ADD ARMOR STAND MANAGEMENT
-		if(cancelInteract(event.getPlayer(), event.getRightClicked().getLocation(), "xclaim.others.interact.armorStand", "on-others-interact")) {
+		if(cancelEvent(event.getPlayer(), event.getRightClicked().getLocation(), "xclaim.others.interact.armorStand", "on-others-interact")) {
 			event.setCancelled(true);
 		}
 //		event.getPlayer().sendMessage("PlayerArmorStandManipulate event");
@@ -234,7 +264,7 @@ public class EventListener implements Listener{
 		if(!isWorldEnabled(event.getPlayer())) {
 			return;
 		}
-		if(cancelInteract(event.getPlayer(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.place", "on-others-interact")) {
+		if(cancelEvent(event.getPlayer(), event.getEntity().getLocation(), "²", "on-others-interact")) {
 			event.setCancelled(true);
 		}
 		event.getPlayer().updateInventory();
@@ -247,7 +277,7 @@ public class EventListener implements Listener{
 		}
 		//TODO ADD HANGING BREAK MANAGEMENT
 		if(event.getRemover() instanceof Player) {
-			if(cancelInteract((Player)(event).getRemover(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.break", "on-others-interact")) {
+			if(cancelEvent((Player)(event).getRemover(), event.getEntity().getLocation(), "xclaim.others.interact.paintings.break", "on-others-interact")) {
 				event.setCancelled(true);	
 			}
 		}
@@ -262,7 +292,7 @@ public class EventListener implements Listener{
 			return;
 		}
 		Entity entity = event.getRightClicked();
-		if(cancelInteract(event.getPlayer(), entity.getLocation(), "xclaim.others.interact", "on-others-interact")) {
+		if(cancelEvent(event.getPlayer(), entity.getLocation(), "xclaim.others.interact", "on-others-interact")) {
 			event.setCancelled(true);
 		}
 //		event.getPlayer().sendMessage("PlayerInteractEntity event");
@@ -280,6 +310,32 @@ public class EventListener implements Listener{
 				event.getEntity().setMetadata("player", new FixedMetadataValue(plugin, tnt.getPlayer().getName()));
 				Tnts.remove(tnt);
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerShootBow(EntityShootBowEvent event) {
+		if(!(event.getEntity() instanceof Player)) {
+			return;
+		}
+		Player player = (Player) event.getEntity();
+		if(cancelEvent(player, player.getLocation(), "xclaim.others.bow", "on-other-bow")) {
+			event.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void onCreeperExplode(ExplosionPrimeEvent event) {
+		if(!(event.getEntity() instanceof Creeper)) {
+			return;
+		}
+		Creeper creeper = (Creeper) event.getEntity();
+		if(!(creeper.getTarget() instanceof Player)) {
+			return;
+		}
+		Player player = (Player) creeper.getTarget();
+		if(cancelEvent(player, creeper.getLocation())) {
+			event.setCancelled(true);
 		}
 	}
 	
@@ -330,7 +386,7 @@ public class EventListener implements Listener{
 					if(player != null && player.hasPermission("xclaim.others.tnt.damage.entity")) {
 						return;
 					}
-					else if(cancelInteract(player, event.getEntity().getLocation())){
+					else if(cancelEvent(player, event.getEntity().getLocation())){
 						event.setCancelled(true);
 					}
 				}
@@ -344,9 +400,20 @@ public class EventListener implements Listener{
 			Entity entity = event.getEntity();
 			Player damager = (Player)event.getDamager();
 			if(!damager.hasPermission("xclaim.others.entity.hit")) {
-				if(cancelInteract(damager, entity.getLocation(), "xclaim.others.entity.hit", "on-others-entity-hit")) {
+				if(cancelEvent(damager, entity.getLocation(), "xclaim.others.entity.hit", "on-others-entity-hit")) {
 					event.setCancelled(true);
 				}
+			}
+		}
+		
+		else if(event.getDamager() instanceof Projectile) {
+			Projectile projectile = (Projectile)event.getDamager();
+			if(projectile.getShooter() == null || !(projectile.getShooter() instanceof Player)) {
+				return;
+			}
+			Player shooter = (Player) projectile.getShooter();
+			if(cancelEvent(shooter, event.getEntity().getLocation(), "xclaim.others.entity.arrow", "on-others-entity-arrow")) {
+				event.setCancelled(true);
 			}
 		}
 	}

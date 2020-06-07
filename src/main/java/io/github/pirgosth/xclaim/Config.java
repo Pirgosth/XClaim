@@ -1,4 +1,4 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import java.io.File;
 import java.io.IOException;

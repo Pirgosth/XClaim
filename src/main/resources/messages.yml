@@ -1,0 +1,80 @@
+restrictions:
+  on-command: '&4You can''t do this command.'
+  on-others-blocks-break: '&4You can''t break blocks here!'
+  on-others-blocks-place: '&4You can''t place blocks here.'
+  on-others-interact: '&4You can''t interact here!'
+  on-other-farmland-break: '&4You can''t break farmlands here!'
+  on-others-entity-hit: '&4You can''t hit entities here!'
+  on-others-entity-leash: '&4You can''t leash entities here!'
+  on-others-entity-unleash: '&4You can''t unleash entities here!'
+  on-others-entity-arrow: '&4You can''t shoot these entities!'
+  on-other-bow: '&4You can''t use bows here!'
+  on-others-items-pickup: '&4You can''t pickup items here!'
+  on-others-items-drop: '&4You can''t drop items here!'
+  on-others-remove: '&4You are not allowed to remove this claim!'
+informations:
+  #When player enter and leave a claim
+  on-claim-entry: '&7Welcome to &a%f &7<&a%s&7> claim.'
+  on-claim-exit: '&7You''re leaving &e%f &7<&e%s&7> claim.'
+  #Messages relative to claim creation
+  on-claim-created: '&3Area claimed in a radius of &7%s &3blocks!'
+  on-missing-name: '&4A name is required to create a claim!'
+  on-multiple-name: '&3You already have a claim named &7%s.'
+  on-claim-overlap: '&4You can''t claim a claim!'
+  on-too-near: '&3Your claim is to near from another one!'
+  on-invalid-claim-size: '&3Size must be between &71 &3and &7%s.'
+  on-too-many-claims: '&3You have already reached the maximum amount of claims.'
+  #Messages relative to claim deletion
+  on-no-remove: '&7You have no claim to remove.'
+  on-remove-send: '&7Claim: <&a%s&7> has been removed!'
+  on-remove-receive: '&a%f &7removed &a%s &7claim.'
+  on-not-owner-remove: '&4You must be an owner of this claim to remove it!'
+  #Messages relative to claim list
+  on-no-claim: '&7You have no claim.'
+  #Messages relative to claim info
+  on-claims-disp: '&7Your claims: &3%s.'
+  #Messages relative to claim Members
+  ###Adding members
+  on-added-member-send: '&a%s &7added as member to this claim.'
+  on-added-member-received: '&a%f &7added you as member of &a%s.'
+  on-already-member: '&7Player &a%s &7is already a member of this claim!'
+  on-not-in-claim-add-member: '&4You must be in a claim to add a member!'
+  on-not-in-own-claim-add-member: '&4You must be in your claims to add a member!'
+  ###Removing members
+  on-del-member-send: '&7Member &a%s &7removed from this claim.'
+  on-del-member-received: '&a%f &7removed you as member from &a%s.'
+  on-not-member: '&a%s &7is not a member of this claim.'
+  on-not-in-claim-del-member: '&4You must be in a claim to remove a member!'
+  on-not-in-own-claim-del-member: '&4You must be in your claims to remove a member!'
+  #Messages relatve to claim Owners
+  ###Adding owners
+  on-added-owner-send: '&a%s &7added as owner to this claim.'
+  on-added-owner-received: '&a%f &7added you as owner of &a%s.'
+  on-already-owner: '&7Player &a%s &7is already an owner of this claim!'
+  on-not-in-claim-add-owner: '&4You must be in a claim to add an owner!'
+  on-not-in-own-claim-add-owner: '&4You must be in your claims to add an owner!'
+  ###Removing owners
+  on-del-owner-send: '&7Owner &a%s &7removed from this claim.'
+  on-del-owner-received: '&a%f &7removed you as owner from &a%s.'
+  on-not-owner: '&a%s &7is not an owner of this claim.'
+  on-not-in-claim-del-owner: '&4You must be in a claim to remove an owner!'
+  on-not-in-own-claim-del-owner: '&4You must be in your claims to remove an owner!'
+  on-too-few-owners: '&7There must have at least one owner in this claim!'
+  #Messages relative to claim home
+  on-home-teleport: '&3Teleportation to your claim &2%s.'
+  on-sethome: '&3New home set for &2%s.'
+  on-missing-claim: '&4You forget to specify a claim!'
+  on-incorrect-claim: '&4You have no claim named: &7%s.'
+  on-not-in-own-claim: '&4You must be in one of your claims to do that!'
+  on-invalid-home: '&4Your home location is invalid. Please set a new one.'
+  #Messages relative to claim leave
+  on-claim-left-send: '&a%f&7 left <&a%s&7> claim.'
+  on-claim-left-receive: '&7You left <&a%s&7> claim.'
+  on-not-in-claim-leave: '&4You must be in a claim to leave it!'
+  #Others
+  on-not-in-claim: '&4You''re not in a claim!'
+  on-invalid-type-int: '&4Invalid type ! Must be an integer!'
+  on-player-not-found: '&7There is no player &3%s &7online.'
+  on-missing-playername: '&4You forget to specify a player!'
+  on-too-many-args: '&4Too many arguments!'
+  on-invalid-argument: '&4Invalid argument!'

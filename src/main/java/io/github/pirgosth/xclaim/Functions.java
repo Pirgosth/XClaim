@@ -1,4 +1,4 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import java.util.Collection;
 import java.util.List;

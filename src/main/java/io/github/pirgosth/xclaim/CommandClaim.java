@@ -1,4 +1,4 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,12 +55,12 @@ public class CommandClaim implements CommandExecutor{
 	
 	public void dispClaimList(Player player) {
 		String world = player.getWorld().getName();
-		if(main.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims") == null || 
-				main.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims").getKeys(false).size() == 0) {
+		if(XClaim.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims") == null || 
+				XClaim.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims").getKeys(false).size() == 0) {
 			Messages.sendInformation("on-no-claim", player);
 			return;
 		}
-		Set<String> list = main.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims").getKeys(false);
+		Set<String> list = XClaim.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims").getKeys(false);
 		Messages.sendInformation("on-claims-disp", player, list.toString());
 	}
 	
@@ -83,7 +83,7 @@ public class CommandClaim implements CommandExecutor{
 			if(sender instanceof ConsoleCommandSender) {
 				ConsoleCommandSender console = (ConsoleCommandSender)sender;
 				if(args.length > 0 && args[0].equalsIgnoreCase("reload")) {
-					JavaPlugin plugin = main.getProvidingPlugin(getClass());
+					JavaPlugin plugin = XClaim.getProvidingPlugin(getClass());
 					Data.reload(plugin);
 					for(Player p: Bukkit.getOnlinePlayers()) {
 						ClaimData.updatePlayerRegion(p);
@@ -105,7 +105,7 @@ public class CommandClaim implements CommandExecutor{
 							Messages.sendRestriction("on-command", player);
 							return true;
 						}
-						JavaPlugin plugin = main.getProvidingPlugin(getClass());
+						JavaPlugin plugin = XClaim.getProvidingPlugin(getClass());
 						Data.reload(plugin);
 						for(Player p: Bukkit.getOnlinePlayers()) {
 							ClaimData.updatePlayerRegion(p);
@@ -113,7 +113,7 @@ public class CommandClaim implements CommandExecutor{
 						player.sendMessage(ChatColor.DARK_GREEN + "Plugin reloaded !");
 						return true;
 					}
-					if(main.worlds.get(world)) {
+					if(XClaim.worlds.get(world)) {
 						if(args[0].equalsIgnoreCase("create")) {
 							
 							if(!player.hasPermission("xclaim.command.create")) {
@@ -122,13 +122,13 @@ public class CommandClaim implements CommandExecutor{
 								return true;
 							}
 							if(args.length == 3) {
-								if(main.cds.get(player.getName()) == null) {
+								if(XClaim.cds.get(player.getName()) == null) {
 										//Cuboid claim
-										if(main.playersYml.get(world) == null) {
+										if(XClaim.playersYml.get(world) == null) {
 											Functions.log(ChatColor.DARK_RED + world);
 										}
-										if(main.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims") != null &&
-												Functions.containsIgnoringCase(new ArrayList<String>(main.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims").getKeys(false)), args[1])) {
+										if(XClaim.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims") != null &&
+												Functions.containsIgnoringCase(new ArrayList<String>(XClaim.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims").getKeys(false)), args[1])) {
 											Messages.sendInformation("on-multiple-name", player, args[1]);
 											return true;
 										}
@@ -140,7 +140,7 @@ public class CommandClaim implements CommandExecutor{
 											Messages.sendInformation("on-invalid-type-int", player);
 											return true;
 										}
-										int rmax = main.config.getInt("claims.range");
+										int rmax = XClaim.config.getInt("claims.range");
 										if(r < 1 || r > rmax) {
 											Messages.sendInformation("on-invalid-claim-size", player, Integer.toString(rmax));
 											return true;
@@ -152,8 +152,8 @@ public class CommandClaim implements CommandExecutor{
 											Messages.sendInformation("on-too-near", player);
 											return true;
 										}
-										ConfigurationSection cfgs = main.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims");
-										if(!player.hasPermission("xclaim.claims.count.unlimited") && cfgs != null && cfgs.getKeys(false).size() >= main.config.getInt("claims.count")) {
+										ConfigurationSection cfgs = XClaim.playersYml.get(world).get().getConfigurationSection(player.getName()+".claims");
+										if(!player.hasPermission("xclaim.claims.count.unlimited") && cfgs != null && cfgs.getKeys(false).size() >= XClaim.config.getInt("claims.count")) {
 											Messages.sendInformation("on-too-many-claims", player);
 											return true;
 										}
@@ -319,7 +319,7 @@ public class CommandClaim implements CommandExecutor{
 								return true;
 							}
 							if(args.length == 2) {
-								ClaimData cd = main.cds.get(player.getName());
+								ClaimData cd = XClaim.cds.get(player.getName());
 								if(cd == null) {
 									Messages.sendInformation("on-not-in-claim-add-owner", player);
 									return true;
@@ -375,7 +375,7 @@ public class CommandClaim implements CommandExecutor{
 								return true;
 							}
 							if(args.length == 2) {
-								ClaimData cd = main.cds.get(player.getName());
+								ClaimData cd = XClaim.cds.get(player.getName());
 								if(cd == null) {
 									Messages.sendInformation("on-not-in-claim-del-owner", player);
 									return true;
@@ -427,7 +427,7 @@ public class CommandClaim implements CommandExecutor{
 								return true;
 							}
 							if(args.length == 2) {
-								ClaimData cd = main.cds.get(player.getName());
+								ClaimData cd = XClaim.cds.get(player.getName());
 								if(cd == null) {
 									Messages.sendInformation("on-not-in-claim-add-member", player);
 									return true;
@@ -482,7 +482,7 @@ public class CommandClaim implements CommandExecutor{
 								return true;
 							}
 							if(args.length == 2) {
-								ClaimData cd = main.cds.get(player.getName());
+								ClaimData cd = XClaim.cds.get(player.getName());
 								if(cd == null) {
 									Messages.sendInformation("on-not-in-claim-del-member", player);
 									return true;

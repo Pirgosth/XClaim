@@ -1,4 +1,4 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import java.util.List;
 import java.util.Set;
@@ -9,14 +9,15 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import com.pirgosth.xclaim.Coordinates.CoordinateFormatException;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
+
+import io.github.pirgosth.xclaim.Coordinates.CoordinateFormatException;
 
 public class ClaimData {
 	
 	public static void updatePlayerRegion(Player player, Location location) {
-		main.cds.put(player.getName(), ClaimData.getInRegion(location, player.getWorld().getName()));
+		XClaim.cds.put(player.getName(), ClaimData.getInRegion(location, player.getWorld().getName()));
 	}
 	
 	public static void updatePlayerRegion(Player player) {
@@ -24,15 +25,15 @@ public class ClaimData {
 	}
 	
 	public static ClaimData getPlayerRegion(Player player) {
-		return main.cds.get(player.getName());
+		return XClaim.cds.get(player.getName());
 	}
 	
 	public static void setPlayerRegion(Player player, ClaimData cd) {
-		main.cds.put(player.getName(), cd);
+		XClaim.cds.put(player.getName(), cd);
 	}
 	
 	public static ClaimData getInRegion(Location location, String world) {
-		if(!main.worlds.get(world)) {
+		if(!XClaim.worlds.get(world)) {
 			return null;
 		}
 		Set<String> nodes = ClaimYml.getNodes(world);

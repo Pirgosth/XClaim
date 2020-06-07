@@ -1,4 +1,4 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Data {
 	
 	public static void initWorlds(JavaPlugin plugin, List<String> worldsList) {
-		main.worldsYml = new Config("worlds.yml", plugin,  cfg -> {
+		XClaim.worldsYml = new Config("worlds.yml", plugin,  cfg -> {
 			for(String world: worldsList) {
 				cfg.addDefault(world+".enabled", true);
 			}
@@ -21,19 +21,19 @@ public class Data {
 	}
 	
 	public static void initDefaultConfig() {
-		main.config.addDefault("claims.range", 200);
-		main.config.addDefault("claims.count", 3);
+		XClaim.config.addDefault("claims.range", 200);
+		XClaim.config.addDefault("claims.count", 3);
 	}
 	
 	public static void loadClaims(JavaPlugin plugin, List<String> worldsList) {
 		for(String world : worldsList) {
-			main.claimsYml.put(world, new Config("worlds/" + world + "/claims.yml", plugin));
+			XClaim.claimsYml.put(world, new Config("worlds/" + world + "/claims.yml", plugin));
 		}
 	}
 	
 	public static void loadPlayers(JavaPlugin plugin, List<String> worldsList) {
 		for(String world : worldsList) {
-			main.playersYml.put(world, new Config("worlds/" + world + "/players.yml", plugin));
+			XClaim.playersYml.put(world, new Config("worlds/" + world + "/players.yml", plugin));
 		}
 	}
 	
@@ -56,7 +56,7 @@ public class Data {
 	
 	public static void loadWorlds(List<String> worldsList) {
 		for(String world : worldsList){
-			main.worlds.put(world, main.worldsYml.get().getBoolean(world+".enabled"));//Dynamically load worlds state
+			XClaim.worlds.put(world, XClaim.worldsYml.get().getBoolean(world+".enabled"));//Dynamically load worlds state
 			File file = new File("plugins/XClaim/worlds/" + world);
 			if(file.mkdirs()) {//Create corresponding directories (./worlds/<worldname>/)
 				//Functions.log("Dir created successfuly !");
@@ -69,7 +69,7 @@ public class Data {
 	
 	public static void load(JavaPlugin plugin) {
 		initDefaultConfig();
-		main.messagesYml = new Config("messages.yml", plugin);
+		XClaim.messagesYml = new Config("messages.yml", plugin);
 		List<String> worldsList = Data.getWorldsList();
 		Data.initWorlds(plugin, worldsList);
 		loadWorlds(worldsList);
@@ -78,12 +78,12 @@ public class Data {
 	}
 	
 	public static void reload(JavaPlugin plugin) {
-		main.claimsYml.forEach((k, v)-> v.save());
-		main.playersYml.forEach((k, v)-> v.save());
+		XClaim.claimsYml.forEach((k, v)-> v.save());
+		XClaim.playersYml.forEach((k, v)-> v.save());
 		ConsoleCommandSender sender = Bukkit.getConsoleSender();
 		plugin.reloadConfig();
-		main.config = plugin.getConfig();
-		main.messagesYml = new Config("messages.yml", plugin);
+		XClaim.config = plugin.getConfig();
+		XClaim.messagesYml = new Config("messages.yml", plugin);
 		List<String> worldsList = Data.getWorldsList();
 		initWorlds(plugin, worldsList);
 		loadWorlds(worldsList);
@@ -94,11 +94,11 @@ public class Data {
 	
 	public static void save(JavaPlugin plugin) {
 		ConsoleCommandSender sender = Bukkit.getConsoleSender();
-		main.claimsYml.forEach((k, v)-> v.save());
-		main.playersYml.forEach((k, v)-> v.save());
+		XClaim.claimsYml.forEach((k, v)-> v.save());
+		XClaim.playersYml.forEach((k, v)-> v.save());
 		plugin.saveConfig();
-		main.messagesYml.save();
-		main.worldsYml.save();
+		XClaim.messagesYml.save();
+		XClaim.worldsYml.save();
 		sender.sendMessage("[XClaim]: " + ChatColor.DARK_GREEN + "Data saved");
 	}
 }

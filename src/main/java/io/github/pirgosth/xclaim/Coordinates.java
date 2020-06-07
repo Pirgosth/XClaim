@@ -1,4 +1,4 @@
-package com.pirgosth.xclaim;
+package io.github.pirgosth.xclaim;
 
 import com.sk89q.worldedit.math.BlockVector3;
 
