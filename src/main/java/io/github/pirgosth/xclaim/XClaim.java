@@ -1,43 +1,50 @@
 package io.github.pirgosth.xclaim;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.bukkit.Bukkit;
+import io.github.pirgosth.liberty.core.LibertyCore;
+import io.github.pirgosth.xclaim.commands.AdminCommands;
+import io.github.pirgosth.xclaim.commands.ClaimCommands;
+import io.github.pirgosth.xclaim.config.XClaimConfig;
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class XClaim extends JavaPlugin{
-	public static FileConfiguration config = null;
-	public static Config messagesYml = null;
+	@Getter
+	private static XClaim instance;
+
+	public static FileConfiguration mainConfig;
+	public static Config messagesYml;
 	public static Config worldsYml = null;
-	public static Map<String, Config> claimsYml = new HashMap<>();;
-	public static Map<String, Config> playersYml = new HashMap<>();;
-	public static Map<String, Boolean> worlds = new HashMap<>();
-	public static Map<String, ClaimData> cds = new HashMap<>();
-	
+
 	@Override
 	public void onEnable() {
-		config = this.getConfig();
-		config.options().copyDefaults(true);
-		Data.load(this);
-		Data.save(this);
-		
-		getServer().getPluginManager().registerEvents(new EventListener(this), this);
-		getCommand("claim").setExecutor(new CommandClaim());
-		getCommand("claim").setTabCompleter(new ClaimTabComplete());
+		XClaim.instance = this;
+
+		mainConfig = this.getConfig();
+		mainConfig.options().copyDefaults(true);
+
+		messagesYml = new Config("messages.yml", this);
+
+//		getServer().getPluginManager().registerEvents(new EventListener(this), this);
+
+//		getCommand("claim").setExecutor(new CommandClaim());
+//		getCommand("claim").setTabCompleter(new ClaimTabComplete());
+
 		//Refresh players' claimData when plugin is reloaded
-		for(Player player: Bukkit.getOnlinePlayers()) {
-			ClaimData.updatePlayerRegion(player);
-		}
-		new YmlAutoSave(this).runTaskTimer(this, 200, 36000);//Auto-save configuration files
+//		for(Player player: Bukkit.getOnlinePlayers()) {
+//			ClaimData.updatePlayerRegion(player);
+//		}
+
+		LibertyCore.getInstance().getCommandRegister().register(this, new ClaimCommands());
+		LibertyCore.getInstance().getCommandRegister().register(this, new AdminCommands());
+
+		new YmlAutoSave().runTaskTimer(this, 200, 36000);//Auto-save configuration files
 		Functions.log("[XClaim]" + ChatColor.GREEN + " Plugin loaded !");
 	}
 
 	@Override
 	public void onDisable() {
-		Data.save(this);
+		XClaimConfig.getConfiguration().save();
 	}
 }

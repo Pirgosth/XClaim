@@ -1,15 +1,12 @@
 package io.github.pirgosth.xclaim;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
-import com.sk89q.worldedit.math.BlockVector3;
 
 public class Functions {
 	public static void log(final String message) {
@@ -45,9 +42,5 @@ public class Functions {
 			}
 		}
 		return false;
-	}
-	
-	public static BlockVector3 Location2Vector(Location l) {
-		return BlockVector3.at(l.getBlockX(), l.getBlockY(), l.getBlockZ());
 	}
 }

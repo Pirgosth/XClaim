@@ -10,8 +10,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Config {
 	
-	private String path = "";
-	private JavaPlugin plugin = null;
+	private final String path;
+	private final JavaPlugin plugin;
 	private File file = null;
 	private FileConfiguration fileConfig = null;
 	

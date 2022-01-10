@@ -1,19 +1,13 @@
 package io.github.pirgosth.xclaim;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import io.github.pirgosth.xclaim.config.XClaimConfig;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class YmlAutoSave extends BukkitRunnable{
 
-	private JavaPlugin plugin = null;
-	
-	public YmlAutoSave(JavaPlugin plugin) {
-		this.plugin = plugin;
-	}
-	
 	@Override
 	public void run() {
-		Data.save(plugin);
+		XClaimConfig.getConfiguration().save();
 	}
 	
 }
