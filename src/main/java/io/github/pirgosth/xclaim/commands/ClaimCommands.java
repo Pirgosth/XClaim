@@ -9,6 +9,8 @@ import io.github.pirgosth.liberty.core.api.commands.annotations.LibertyCommandEx
 import io.github.pirgosth.liberty.core.api.commands.annotations.LibertyCommandPermission;
 import io.github.pirgosth.liberty.core.api.utils.ChatUtils;
 import io.github.pirgosth.liberty.core.commands.CommandParameters;
+import io.github.pirgosth.xclaim.cache.IPlayerClaimCache;
+import io.github.pirgosth.xclaim.cache.PlayerClaimCacheManager;
 import io.github.pirgosth.xclaim.config.*;
 import io.github.pirgosth.xclaim.math.CuboidRegion;
 import org.bukkit.Bukkit;
@@ -152,13 +154,10 @@ public class ClaimCommands implements ICommandListener {
     }
 
     private void displayClaimInfo(Player player) {
-        WorldSection worldSection = Objects.requireNonNull(XClaimConfig.getConfiguration().getWorldSection(player.getWorld()));
-//        IPlayerClaimCache pcc = PlayerClaimCacheManager.getInstance().getPlayerClaimCache(player);
+        IPlayerClaimCache pcc = PlayerClaimCacheManager.getInstance().getPlayerClaimCache(player);
 
-        ClaimConfiguration claim = worldSection.getClaimConfigurationByLocation(player.getLocation());
-
-        if (claim != null) {
-//            @NotNull ClaimConfiguration claim = Objects.requireNonNull(pcc.getClaim());
+        if (!pcc.isInWild()) {
+            @NotNull ClaimConfiguration claim = Objects.requireNonNull(pcc.getClaim());
             List<String> memberNames = new ArrayList<>();
             List<String> ownerNames = new ArrayList<>();
             for (ClaimMember member : claim.getMembers()) memberNames.add(member.getSpigotPlayer().getName());

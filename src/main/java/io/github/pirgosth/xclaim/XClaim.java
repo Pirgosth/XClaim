@@ -22,7 +22,7 @@ public class XClaim extends JavaPlugin{
 		mainConfig = this.getConfig();
 		mainConfig.options().copyDefaults(true);
 
-//		getServer().getPluginManager().registerEvents(new EventListener(this), this);
+		getServer().getPluginManager().registerEvents(new EventListener(), this);
 
 		//Refresh players' claimData when plugin is reloaded
 //		for(Player player: Bukkit.getOnlinePlayers()) {

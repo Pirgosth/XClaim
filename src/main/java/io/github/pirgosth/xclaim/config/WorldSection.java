@@ -150,7 +150,7 @@ public class WorldSection {
         ClaimConfiguration lastClaim = this.claimConfigurations.get(cursor);
         boolean doesLastClaimContainsLocation = lastClaim.getRegion().contains(location);
 
-        while (lowBound != highBound && !doesLastClaimContainsLocation) {
+        while (lowBound <= highBound && !doesLastClaimContainsLocation) {
             if (distance > this.claimConfigurations.get(cursor).getRegion().distance()) {
                 lowBound = cursor + 1;
             } else {
