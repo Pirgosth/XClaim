@@ -3,24 +3,19 @@ package io.github.pirgosth.xclaim;
 import org.bukkit.event.Listener;
 
 public class EventListener implements Listener{
-	//TODO ADD RECENT REGION IN CDS TO AVOID RECALCULATE REGION ON EVERY SINGLE EVENT
-	//TODO CLARIFY CODE
-//	private JavaPlugin plugin = null;
+//	//TODO ADD RECENT REGION IN CDS TO AVOID RECALCULATE REGION ON EVERY SINGLE EVENT
+//	//TODO CLARIFY CODE
 //
-//	private Map<UUID, Long> messageTimeouts = new HashMap<>();
+//	private final Map<UUID, Long> messageTimeouts = new HashMap<>();
 //
-//	public EventListener(JavaPlugin plugin) {
-//		this.plugin = plugin;
-//	}
-//
-//	private boolean canSendMessage(Player player, long timeout) {
+//	private boolean canSendMessage(Player player) {
 //		if(!this.messageTimeouts.containsKey(player.getUniqueId())) {
 //			this.messageTimeouts.put(player.getUniqueId(), System.currentTimeMillis());
 //			return true;
 //		}
 //		long lastTime = this.messageTimeouts.get(player.getUniqueId());
 //		long currentTime = System.currentTimeMillis();
-//		if(currentTime - lastTime > timeout) {
+//		if(currentTime - lastTime > 2000L) {
 //			this.messageTimeouts.put(player.getUniqueId(), currentTime);
 //			return true;
 //		}
@@ -28,8 +23,16 @@ public class EventListener implements Listener{
 //	}
 //
 //	private boolean cancelEvent(Player player, Location location) {
-//		ClaimData cd = ClaimData.getInRegion(location, player.getWorld().getName());
-//		if(cd != null && !cd.isOwnerOf(player) && !cd.isMemberOf(player)) {
+//
+//        //TODO: Store interactions with claims in playerCache (List of recent claims) and search for them before searching in all claims.
+//
+//        ClaimConfiguration playerCacheClaim = PlayerClaimCacheManager.getInstance().getPlayerClaimCache(player).getClaim();
+//        if(playerCacheClaim != null && playerCacheClaim.getRegion().contains(location)) {
+//
+//        }
+//
+//
+//		if(cd != null && !cd.isOwnxerOf(player) && !cd.isMemberOf(player)) {
 //			return true;
 //		}
 //		return false;
@@ -38,7 +41,7 @@ public class EventListener implements Listener{
 //	private boolean cancelEvent(Player player, Location location, String permission, String restriction) {
 //		boolean cancel = cancelEvent(player, location);
 //		if(cancel && !player.hasPermission(permission)) {
-//			if(this.canSendMessage(player, 2000)) {
+//			if(this.canSendMessage(player)) {
 //				Messages.sendRestriction(restriction, player);
 //			}
 //			return true;

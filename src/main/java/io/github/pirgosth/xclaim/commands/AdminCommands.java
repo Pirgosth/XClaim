@@ -24,7 +24,6 @@ public class AdminCommands implements ICommandListener {
     @LibertyCommandPermission(permission = "xclaim.admin.commands.save")
     public boolean save(CommandParameters params) {
         XClaimConfig.getConfiguration().save();
-        XClaim.messagesYml.save();
         Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GREEN + "Plugin configuration saved on the disk!");
         return true;
     }

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class ClaimConfiguration implements ConfigurationSerializable {
+public class ClaimConfiguration implements ConfigurationSerializable, Comparable<ClaimConfiguration> {
     @Getter
     private final UUID id;
     @Getter
@@ -44,7 +44,7 @@ public class ClaimConfiguration implements ConfigurationSerializable {
     @Nullable
     public ClaimMember getMember(OfflinePlayer player) {
         for (ClaimMember member : this.members) {
-            if (member.getSpigotPlayer().equals(player)) return member;
+            if (member.getSpigotPlayer().getUniqueId().equals(player.getUniqueId())) return member;
         }
         return null;
     }
@@ -85,5 +85,14 @@ public class ClaimConfiguration implements ConfigurationSerializable {
         map.put("region", this.region.serialize());
 
         return map;
+    }
+
+    @Override
+    public int compareTo(@NotNull ClaimConfiguration other) {
+        int otherDistance = other.getRegion().distance();
+        int distance = this.getRegion().distance();
+
+        if(otherDistance == distance) return 0;
+        return distance > otherDistance ? 1 : -1;
     }
 }

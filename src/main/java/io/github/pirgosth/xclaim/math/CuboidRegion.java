@@ -17,9 +17,11 @@ import java.util.UUID;
 public class CuboidRegion extends Region implements ConfigurationSerializable {
 
     private final World world;
-    @NotNull @Getter
+    @NotNull
+    @Getter
     private final BlockVector lowCorner;
-    @NotNull @Getter
+    @NotNull
+    @Getter
     private final BlockVector highCorner;
 
     public CuboidRegion(Map<String, Object> map) {
@@ -30,8 +32,8 @@ public class CuboidRegion extends Region implements ConfigurationSerializable {
         this.world = (rawWorldId instanceof String) ? Bukkit.getWorld(UUID.fromString((String) rawWorldId)) : null;
         this.lowCorner = (rawLowCorner instanceof Map) ? BlockVector.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawLowCorner)) : null;
         this.highCorner = (rawHighCorner instanceof Map) ? BlockVector.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawHighCorner)) : null;
-        if(this.lowCorner == null) throw new IllegalArgumentException("Low corner is null.");
-        if(this.highCorner == null) throw new IllegalArgumentException("High corner is null.");
+        if (this.lowCorner == null) throw new IllegalArgumentException("Low corner is null.");
+        if (this.highCorner == null) throw new IllegalArgumentException("High corner is null.");
     }
 
     public CuboidRegion(Location center, int radius) {
@@ -59,7 +61,13 @@ public class CuboidRegion extends Region implements ConfigurationSerializable {
     }
 
     public int getRadius() {
-        return (highCorner.getBlockX() - lowCorner.getBlockX())/2;
+        return (highCorner.getBlockX() - lowCorner.getBlockX()) / 2;
+    }
+
+    public int distance() {
+        int x = (this.highCorner.getBlockX() + this.lowCorner.getBlockX()) / 2;
+        int z = (this.highCorner.getBlockZ() + this.lowCorner.getBlockZ()) / 2;
+        return (int) Math.ceil(Math.sqrt(x*x + z*z));
     }
 
     @NotNull
@@ -71,5 +79,10 @@ public class CuboidRegion extends Region implements ConfigurationSerializable {
         map.put("high-corner", this.highCorner.serialize());
 
         return map;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s;%s]-[%s;%s]", lowCorner.getBlockX(), lowCorner.getBlockZ(), highCorner.getBlockX(), highCorner.getBlockZ());
     }
 }

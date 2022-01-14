@@ -14,8 +14,6 @@ public class XClaim extends JavaPlugin{
 	private static XClaim instance;
 
 	public static FileConfiguration mainConfig;
-	public static Config messagesYml;
-	public static Config worldsYml = null;
 
 	@Override
 	public void onEnable() {
@@ -24,12 +22,7 @@ public class XClaim extends JavaPlugin{
 		mainConfig = this.getConfig();
 		mainConfig.options().copyDefaults(true);
 
-		messagesYml = new Config("messages.yml", this);
-
 //		getServer().getPluginManager().registerEvents(new EventListener(this), this);
-
-//		getCommand("claim").setExecutor(new CommandClaim());
-//		getCommand("claim").setTabCompleter(new ClaimTabComplete());
 
 		//Refresh players' claimData when plugin is reloaded
 //		for(Player player: Bukkit.getOnlinePlayers()) {

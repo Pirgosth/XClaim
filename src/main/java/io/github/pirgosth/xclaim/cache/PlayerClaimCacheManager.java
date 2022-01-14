@@ -1,6 +1,9 @@
 package io.github.pirgosth.xclaim.cache;
 
-import org.bukkit.OfflinePlayer;
+import io.github.pirgosth.xclaim.config.ClaimConfiguration;
+import io.github.pirgosth.xclaim.config.WorldSection;
+import io.github.pirgosth.xclaim.config.XClaimConfig;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -11,7 +14,7 @@ public class PlayerClaimCacheManager implements IPlayerClaimCacheManager {
     private static IPlayerClaimCacheManager instance;
 
     public static IPlayerClaimCacheManager getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new PlayerClaimCacheManager();
         }
         return instance;
@@ -25,9 +28,9 @@ public class PlayerClaimCacheManager implements IPlayerClaimCacheManager {
 
     @Override
     @NotNull
-    public IPlayerClaimCache getPlayerClaimCache(@NotNull OfflinePlayer player) {
+    public IPlayerClaimCache getPlayerClaimCache(@NotNull Player player) {
         IPlayerClaimCache playerClaimCache = this.playerClaimCacheMap.get(player.getUniqueId());
-        if(playerClaimCache == null) {
+        if (playerClaimCache == null) {
             playerClaimCache = new PlayerClaimCache();
             playerClaimCacheMap.put(player.getUniqueId(), playerClaimCache);
         }
@@ -35,8 +38,23 @@ public class PlayerClaimCacheManager implements IPlayerClaimCacheManager {
     }
 
     @Override
-    public boolean updatePlayerClaimCache(@NotNull OfflinePlayer player) {
-        return false;
+    public boolean updatePlayerClaimCache(@NotNull Player player) {
+        IPlayerClaimCache playerClaimCache = this.getPlayerClaimCache(player);
+
+        ClaimConfiguration oldClaim = playerClaimCache.getClaim();
+
+        WorldSection worldSection = XClaimConfig.getConfiguration().getWorldSection(player.getWorld());
+        if (worldSection == null) {
+            playerClaimCache.setClaim(null);
+            return oldClaim == null;
+        }
+
+        if(oldClaim != null && oldClaim.getRegion().contains(player)) {
+            return false;
+        }
+
+        playerClaimCache.setClaim(worldSection.getClaimConfigurationByLocation(player.getLocation()));
+        return true;
     }
 
 

@@ -6,5 +6,6 @@ import org.jetbrains.annotations.Nullable;
 public interface IPlayerClaimCache {
     boolean isInWild();
     @Nullable ClaimConfiguration getClaim();
+    void setClaim(ClaimConfiguration claimConfiguration);
 
 }

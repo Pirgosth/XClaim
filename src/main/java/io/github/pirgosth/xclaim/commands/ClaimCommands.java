@@ -9,9 +9,6 @@ import io.github.pirgosth.liberty.core.api.commands.annotations.LibertyCommandEx
 import io.github.pirgosth.liberty.core.api.commands.annotations.LibertyCommandPermission;
 import io.github.pirgosth.liberty.core.api.utils.ChatUtils;
 import io.github.pirgosth.liberty.core.commands.CommandParameters;
-import io.github.pirgosth.xclaim.Messages;
-import io.github.pirgosth.xclaim.cache.IPlayerClaimCache;
-import io.github.pirgosth.xclaim.cache.PlayerClaimCacheManager;
 import io.github.pirgosth.xclaim.config.*;
 import io.github.pirgosth.xclaim.math.CuboidRegion;
 import org.bukkit.Bukkit;
@@ -46,7 +43,6 @@ public class ClaimCommands implements ICommandListener {
         if (radius < 0) {
             //TODO: Send error message to player
             ChatUtils.sendPlayerColorMessage(player, "&cClaim size must be greater than 0.");
-//            Messages.sendInformation("on-invalid-claim-size", entity, Integer.toString(rmax));
             return true;
         }
 
@@ -57,7 +53,6 @@ public class ClaimCommands implements ICommandListener {
         if (!worldSection.isLandAvailable(claimRegion)) {
             //TODO: Send error message to player
             ChatUtils.sendPlayerColorMessage(player, "&cThis location is to near to another claim.");
-//            Messages.sendInformation("on-too-near", player);
             return true;
         }
 
@@ -66,7 +61,6 @@ public class ClaimCommands implements ICommandListener {
         if (!player.hasPermission("xclaim.claims.count.unlimited") || playerConfiguration.getClaimCount() >= XClaimConfig.getConfiguration().getClaimCountPerPlayer()) {
             //TODO: Send error message to player
             ChatUtils.sendPlayerColorMessage(player, "&cYou already reached the maximum amount of claims.");
-//            Messages.sendInformation("on-too-many-claims", player);
             return true;
         }
 
@@ -78,7 +72,6 @@ public class ClaimCommands implements ICommandListener {
 
         //TODO: Send success message to player
         ChatUtils.sendPlayerColorMessage(player, String.format("&3Claim &2%s &3successfully created.", name));
-//        Messages.sendInformation("on-claim-created", player, Integer.toString(r));
         return true;
     }
 
@@ -159,18 +152,26 @@ public class ClaimCommands implements ICommandListener {
     }
 
     private void displayClaimInfo(Player player) {
-        IPlayerClaimCache pcc = PlayerClaimCacheManager.getInstance().getPlayerClaimCache(player);
-        if (!pcc.isInWild()) {
-            @NotNull ClaimConfiguration claim = Objects.requireNonNull(pcc.getClaim());
+        WorldSection worldSection = Objects.requireNonNull(XClaimConfig.getConfiguration().getWorldSection(player.getWorld()));
+//        IPlayerClaimCache pcc = PlayerClaimCacheManager.getInstance().getPlayerClaimCache(player);
+
+        ClaimConfiguration claim = worldSection.getClaimConfigurationByLocation(player.getLocation());
+
+        if (claim != null) {
+//            @NotNull ClaimConfiguration claim = Objects.requireNonNull(pcc.getClaim());
+            List<String> memberNames = new ArrayList<>();
+            List<String> ownerNames = new ArrayList<>();
+            for (ClaimMember member : claim.getMembers()) memberNames.add(member.getSpigotPlayer().getName());
+            for (ClaimMember member : claim.getOwners()) ownerNames.add(member.getSpigotPlayer().getName());
             ChatUtils.sendPlayerColorMessage(player, String.format("""
                     &7Claim Info:
                     Name: &b%s
                     &7Borders: &b%s
                     &7Radius: &b%s
                     &7Members: &b%s
-                    &7Owners: &b%s""", claim.getName(), claim.getRegion(), claim.getRegion().getRadius(), claim.getMembers(), claim.getOwners()));
+                    &7Owners: &b%s""", claim.getName(), claim.getRegion(), claim.getRegion().getRadius(), memberNames, ownerNames));
         } else {
-            Messages.sendInformation("on-not-in-claim", player);
+            ChatUtils.sendPlayerColorMessage(player, "&cYou are not in a claim.");
         }
     }
 
@@ -188,13 +189,13 @@ public class ClaimCommands implements ICommandListener {
         WorldSection worldSection = Objects.requireNonNull(XClaimConfig.getConfiguration().getWorldSection(player.getWorld()));
         List<ClaimConfiguration> claimConfigurations = worldSection.getPlayerConfiguration(player).getClaimConfigurations();
         if (claimConfigurations.isEmpty()) {
-            Messages.sendInformation("on-no-claim", player);
+            ChatUtils.sendPlayerColorMessage(player, "&7You have no claim.");
             return;
         }
 
         List<String> claimNames = new ArrayList<>();
         for (ClaimConfiguration claimConfiguration : claimConfigurations) claimNames.add(claimConfiguration.getName());
-        Messages.sendInformation("on-claims-disp", player, claimNames.toString());
+        ChatUtils.sendPlayerColorMessage(player, String.format("&7Your claims: &3%s", claimNames));
     }
 
     @LibertyCommand(command = "claim.list")
@@ -228,7 +229,7 @@ public class ClaimCommands implements ICommandListener {
 
         Location homeLocation = Objects.requireNonNull(playerConfiguration.getPlayerClaimConfiguration(claimConfiguration).getHome());
 
-        Messages.sendInformation("on-home-teleport", player, claimName);
+        ChatUtils.sendPlayerColorMessage(player, String.format("&7Teleported you to claim &a%s.", claimName));
         player.teleport(homeLocation);
 
         return true;
@@ -245,19 +246,19 @@ public class ClaimCommands implements ICommandListener {
         ClaimConfiguration claimConfiguration = worldSection.getClaimConfigurationByLocation(player.getLocation());
 
         if (claimConfiguration == null) {
-            Messages.sendInformation("on-not-in-claim", player);
+            ChatUtils.sendPlayerColorMessage(player, "&cYou are not in a claim.");
             return true;
         }
 
         if (!claimConfiguration.isMember(player)) {
-            Messages.sendInformation("on-not-in-own-claim", player);
+            ChatUtils.sendPlayerColorMessage(player, "&cYou are not member of this claim.");
             return true;
         }
 
         PlayerConfiguration playerConfiguration = worldSection.getPlayerConfiguration(player);
         playerConfiguration.getPlayerClaimConfiguration(claimConfiguration).setHome(player.getLocation());
 
-        Messages.sendInformation("on-sethome", player, claimConfiguration.getName());
+        ChatUtils.sendPlayerColorMessage(player, String.format("&3New home set for claim &2%s.", claimConfiguration.getName()));
         return true;
     }
 
