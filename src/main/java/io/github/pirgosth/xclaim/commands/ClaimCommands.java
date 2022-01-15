@@ -60,7 +60,7 @@ public class ClaimCommands implements ICommandListener {
 
         PlayerConfiguration playerConfiguration = worldSection.getPlayerConfiguration(player);
 
-        if (!player.hasPermission("xclaim.claims.count.unlimited") || playerConfiguration.getClaimCount() >= XClaimConfig.getConfiguration().getClaimCountPerPlayer()) {
+        if (!player.hasPermission("xclaim.claims.count.unlimited") && playerConfiguration.getClaimCount() >= XClaimConfig.getConfiguration().getClaimCountPerPlayer()) {
             //TODO: Send error message to player
             ChatUtils.sendPlayerColorMessage(player, "&cYou already reached the maximum amount of claims.");
             return true;
