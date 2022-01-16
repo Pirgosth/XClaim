@@ -23,19 +23,36 @@ public class WorldSection {
     private final World world;
     private final Config claimYamlConfig;
     private final Config playerYamlConfig;
+    private Map<ChunkCoordinates, RegionChunk> regionChunkMap;
     private ArrayList<ClaimConfiguration> claimConfigurations;
     private ArrayList<PlayerConfiguration> playerConfigurations;
+
+    @NotNull
+    private RegionChunk getOrCreateChunk(ChunkCoordinates coordinates) {
+        RegionChunk chunk = regionChunkMap.get(coordinates);
+        if (chunk == null) {
+            chunk = new RegionChunk();
+            regionChunkMap.put(coordinates, chunk);
+        }
+
+        return chunk;
+    }
 
     private void deserialize() {
         Map<String, Object> claimMap = claimYamlConfig.get().getValues(true);
         Object rawClaims = claimMap.get("claims");
 
-        if (rawClaims instanceof List) {
-            ArrayList<ClaimConfiguration> sortedClaimConfigurations = new ArrayList<>(SerializationUtils.safeListCast(ClaimConfiguration.class, (List<?>) rawClaims));
-            Collections.sort(sortedClaimConfigurations);
-            this.claimConfigurations = sortedClaimConfigurations;
-        } else {
-            claimConfigurations = new ArrayList<>();
+        this.claimConfigurations = new ArrayList<>();
+        this.regionChunkMap = new HashMap<>();
+
+        ArrayList<ClaimConfiguration> claimConfigurations = new ArrayList<>(SerializationUtils.safeListCast(ClaimConfiguration.class, (List<?>) rawClaims));
+        for (ClaimConfiguration claimConfig : claimConfigurations) {
+            this.claimConfigurations.add(claimConfig);
+            Set<ChunkCoordinates> coordinatesSet = RegionChunk.GetContainingChunkCoordinates(claimConfig.getRegion());
+            for (ChunkCoordinates coordinates : coordinatesSet) {
+                RegionChunk chunk = this.getOrCreateChunk(coordinates);
+                chunk.getClaimConfigurations().add(claimConfig);
+            }
         }
 
         Map<String, Object> playerMap = playerYamlConfig.get().getValues(true);
@@ -61,7 +78,14 @@ public class WorldSection {
     }
 
     public boolean isLandAvailable(CuboidRegion region) {
-        //TODO: implement collision algorithm.
+        for (ChunkCoordinates coordinates : RegionChunk.GetContainingChunkCoordinates(region)) {
+            RegionChunk chunk = this.regionChunkMap.get(coordinates);
+            if (chunk == null) continue;
+            for (ClaimConfiguration claimConfiguration : chunk.getClaimConfigurations()) {
+                if (claimConfiguration.getRegion().overlap(region)) return false;
+            }
+        }
+
         return true;
     }
 
@@ -80,41 +104,12 @@ public class WorldSection {
         return playerConfiguration;
     }
 
-    private int getClaimConfigurationInsertIndex(CuboidRegion region) {
-        int length = this.claimConfigurations.size();
-        int distance = region.distance();
-
-        if (length == 0) {
-            return 0;
-        } else if (length == 1) {
-            return distance > this.claimConfigurations.get(0).getRegion().distance() ? 1 : 0;
-        }
-
-        int lowBound = 0;
-        int highBound = length - 1;
-
-        int cursor = (int) Math.ceil(lowBound + highBound) / 2;
-
-        while (cursor != length - 1 && (distance < this.claimConfigurations.get(cursor).getRegion().distance() || distance > this.claimConfigurations.get(cursor + 1).getRegion().distance())) {
-            if (lowBound > highBound) {
-                return highBound > 0 ? length : 0;
-            }
-
-            if (distance < this.claimConfigurations.get(cursor).getRegion().distance()) {
-                highBound = cursor - 1;
-            } else {
-                lowBound = cursor + 1;
-            }
-
-            cursor = (int) Math.ceil(lowBound + highBound) / 2;
-        }
-
-        return cursor + 1;
-    }
-
     private ClaimConfiguration createClaimConfiguration(Player player, String name, CuboidRegion region) {
         ClaimConfiguration claimConfiguration = new ClaimConfiguration(player, name, region);
-        this.claimConfigurations.add(this.getClaimConfigurationInsertIndex(region), claimConfiguration);
+        this.claimConfigurations.add(claimConfiguration);
+        for (ChunkCoordinates coordinates : RegionChunk.GetContainingChunkCoordinates(claimConfiguration.getRegion())) {
+            this.getOrCreateChunk(coordinates).getClaimConfigurations().add(claimConfiguration);
+        }
         return claimConfiguration;
     }
 
@@ -138,35 +133,21 @@ public class WorldSection {
 
     @Nullable
     public ClaimConfiguration getClaimConfigurationByLocation(Location location) {
-        int length = this.claimConfigurations.size();
-
-        if (length == 0) return null;
-
-        int distance = (int) Math.ceil(Math.sqrt(location.getBlockX() * location.getBlockX() + location.getBlockZ() * location.getBlockZ()));
-
-        int lowBound = 0;
-        int highBound = length - 1;
-        int cursor = (int) Math.ceil(lowBound + highBound) / 2;
-        ClaimConfiguration lastClaim = this.claimConfigurations.get(cursor);
-        boolean doesLastClaimContainsLocation = lastClaim.getRegion().contains(location);
-
-        while (lowBound <= highBound && !doesLastClaimContainsLocation) {
-            if (distance > this.claimConfigurations.get(cursor).getRegion().distance()) {
-                lowBound = cursor + 1;
-            } else {
-                highBound = cursor - 1;
-            }
-
-            cursor = (int) Math.ceil(lowBound + highBound) / 2;
-            lastClaim = this.claimConfigurations.get(cursor);
-            doesLastClaimContainsLocation = lastClaim.getRegion().contains(location);
+        RegionChunk chunk = this.regionChunkMap.get(RegionChunk.GetChunkCoordinates(location));
+        if (chunk == null) return null;
+        for (ClaimConfiguration claimConfiguration : chunk.getClaimConfigurations()) {
+            if (claimConfiguration.getRegion().contains(location)) return claimConfiguration;
         }
-
-        return doesLastClaimContainsLocation ? lastClaim : null;
+        return null;
     }
 
-    public boolean removeClaim(ClaimConfiguration claimConfiguration) {
-        return this.claimConfigurations.remove(claimConfiguration);
+    public void removeClaim(ClaimConfiguration claimConfiguration) {
+        for (ChunkCoordinates coordinates : RegionChunk.GetContainingChunkCoordinates(claimConfiguration.getRegion())) {
+            RegionChunk chunk = this.regionChunkMap.get(coordinates);
+            if (chunk == null) continue;
+            chunk.getClaimConfigurations().remove(claimConfiguration);
+        }
+        this.claimConfigurations.remove(claimConfiguration);
     }
 
     public void save() {

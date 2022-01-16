@@ -11,14 +11,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class ClaimConfiguration implements ConfigurationSerializable, Comparable<ClaimConfiguration> {
+public class ClaimConfiguration implements ConfigurationSerializable {
     @Getter
     private final UUID id;
     @Getter
     private final String name;
     @Getter
-    private final List<ClaimMember>  members;
-    @Getter @NotNull
+    private final List<ClaimMember> members;
+    @Getter
+    @NotNull
     private final CuboidRegion region;
 
     public ClaimConfiguration(Player player, String name, @NotNull CuboidRegion region) {
@@ -38,7 +39,7 @@ public class ClaimConfiguration implements ConfigurationSerializable, Comparable
         this.name = (rawName instanceof String) ? (String) rawName : "Invalid Name";
         this.members = (rawMembers instanceof List) ? SerializationUtils.safeListCast(ClaimMember.class, (List<?>) rawMembers) : new ArrayList<>();
         this.region = (rawRegion instanceof Map) ? new CuboidRegion(SerializationUtils.safeMapSerialize((Map<?, ?>) rawRegion)) : null;
-        if(this.region == null) throw new IllegalArgumentException("Region is null in deserialization.");
+        if (this.region == null) throw new IllegalArgumentException("Region is null in deserialization.");
     }
 
     @Nullable
@@ -74,7 +75,7 @@ public class ClaimConfiguration implements ConfigurationSerializable, Comparable
     public Map<String, Object> serialize() {
         List<Map<String, Object>> serializedMembers = new ArrayList<>();
 
-        for(ClaimMember member : this.members) {
+        for (ClaimMember member : this.members) {
             serializedMembers.add(member.serialize());
         }
 
@@ -85,14 +86,5 @@ public class ClaimConfiguration implements ConfigurationSerializable, Comparable
         map.put("region", this.region.serialize());
 
         return map;
-    }
-
-    @Override
-    public int compareTo(@NotNull ClaimConfiguration other) {
-        int otherDistance = other.getRegion().distance();
-        int distance = this.getRegion().distance();
-
-        if(otherDistance == distance) return 0;
-        return distance > otherDistance ? 1 : -1;
     }
 }
