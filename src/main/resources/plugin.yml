@@ -11,176 +11,171 @@ commands:
     description: Claim a wild area
     usage: /<command>
 permissions:
-  xclaim:
-    admin:
-      commands:
-        remove:
-          others:
-            description: Allow admin to remove others claim.
-            default: false
-    command:
-      create:
-        description: Allow player to use create command
-        default: false
-      info:
-        description: Allow player to use info command
-        default: false
-      home:
-        description: Allow player to use home command
-        default: false
-      sethome:
-        description: Allow player to use sethome command
-        default: false
-      remove:
-        description: Allow player to use remove command
-        default: false
-      addOwner:
-        description: Allow player to add an owner to a claim
-        default: false
-      delOwner:
-        description: Allow player to remove an owner from a claim
-        default: false
-      addMember:
-        description: Allow player to add a member to a claim
-        default: false
-      delMember:
-        description: Allow player to remove a member from a claim
-        default: false
-      leave:
-        description: Allow player to leave a claim
-        default: false
-      reload:
-        description: Allow player to reload all configuration files
-        default: false
-      "*":
-        description: Allow player to use all commands
-        default: false
-        children:
-          xclaim.command.create: true
-          xclaim.command.home: true
-          xclaim.command.sethome: true
-          xclaim.command.remove: true
-          xclaim.command.info: true
-          xclaim.command.addOwner: true
-          xclaim.command.delOwner: true
-          xclaim.command.addMember: true
-          xclaim.command.delMember: true
-          xclaim.command.leave: true
-          xclaim.command.reload: true
-    others:
-      remove:
-        description: Allow player to remove others claims
-        default: false
-      blocks:
-        break:
-          description: Allow player to break blocks in others claims
-          default: false
-        place:
-          description: Allow player to place blocks in others claims
-          default: false
-        "*":
-          description: Allow player to place/break blocks in others claims
-          default: false
-          children:
-            xclaim.others.blocks.break: true
-            xclaim.others.blocks.place: true
-      entity:
-        hit:
-          description: Allow player to hit entity in others claims
-          default: false
-        arrow:
-          description: Allow player to shoot entity in others claims
-          default: false
-        leash:
-          description: Allow player to leash others claims' entities
-          default: false
-        unleash:
-          description: Allow player to unleash others claims' entities
-          default: false
-        "*":
-          description: Allow player to leash/unleash others claims' entities
-          default: false
-          children:
-            xclaim.others.entity.leash: true
-            xclaim.others.entity.unleash: true
-      bow:
-        description: Allow player to use bows in others claims
-        default: false
-      interact:
-        description: Allow player to interact with others claims
-        default: false
-        armorStand:
-          description: Allow player to pickup stuff on armorStand in others claims
-          default: false
-        paintings:
-          description: Allow player to remove paintings in others claims
-          default: false
-      farmland:
-        break:
-          description: Allow player to break farmland in others claims
-          default: false
-      tnt:
-        damage:
-          entity:
-            description: Allow player's tnts to damage others claims' entities
-            default: false
-          blocks:
-            description: Allow player's tnts to destroy others claims' blocks
-            default: false
-          "*":
-            description: Allow player's tnts to damage others claims
-            default: false
-            children:
-              xclaim.others.tnt.damage.entity: true
-              xclaim.others.tnt.damage.blocks: true
-      items:
-        pickup:
-          description: Allow player to pickup items in others claims
-          default: false
-        drop:
-          description: Allow player to drop items in others claims
-          default: false
-        "*":
-          description: Allow player to use items in others claims
-          default: false
-          children:
-            xclaim.others.items.pickup: true
-            xclaim.others.items.drop: true
-      "*":
-        description: Granted all others permissions to player
-        default: false
-        children:
-          xclaim.others.remove: true
-          xclaim.others.blocks.*: true
-          xclaim.others.entity.hit: true
-          xclaim.others.entity.arrow: true
-          xclaim.others.bow: true
-          xclaim.others.interact: true
-          xclaim.others.interact.armorStand: true
-          xclaim.others.interact.paintings: true
-          xclaim.others.farmland.break: true
-          xclaim.others.tnt.damage.*: true
-          xclaim.others.items.*: true
-          xclaim.others.entity.*: true
-    claims:
-      count:
-        unlimited:
-          description: Allow player to create unlimited amount of claims
-          default: false
-      range:
-        unlimited:
-          description: Allow player to create claims with unlimited range
-          default: false
-      "*":
-        description: Granted all claims permissions
-        default: false
-        children:
-          xclaim.claims.count.unlimited: true
-          xclaim.claims.range.unlimited: true
-    "*":
-      description: Wildcard permission
-      default: op
-      children:
-        xclaim.command.*: true
-        xclaim.others.*: true
-        xclaim.claims.*: true
+  xclaim.admin.commands.remove.others:
+    description: Allow admin to remove others claim.
+    default: false
+  xclaim.admin.commands.reload:
+    description: Allow player to reload all configuration files
+    default: false
+  xclaim.admin.commands.*:
+    description: Grant all admin commands permissions
+    default: false
+    children:
+      xclaim.admin.commands.remove.others: true
+      xclaim.admin.commands.reload: true
+  xclaim.admin.*:
+    description: Grant all admin permissions
+    default: false
+    children:
+      xclaim.admin.commands.*: true
+  xclaim.commands.create:
+    description: Allow player to use create command
+    default: false
+  xclaim.commands.info:
+    description: Allow player to use info command
+    default: false
+  xclaim.commands.home:
+    description: Allow player to use home command
+    default: false
+  xclaim.commands.sethome:
+    description: Allow player to use sethome command
+    default: false
+  xclaim.commands.remove:
+    description: Allow player to use remove command
+    default: false
+  xclaim.commands.addOwner:
+    description: Allow player to add an owner to a claim
+    default: false
+  xclaim.commands.delOwner:
+    description: Allow player to remove an owner from a claim
+    default: false
+  xclaim.commands.addMember:
+    description: Allow player to add a member to a claim
+    default: false
+  xclaim.commands.delMember:
+    description: Allow player to remove a member from a claim
+    default: false
+  xclaim.commands.leave:
+    description: Allow player to leave a claim
+    default: false
+  xclaim.commands.*:
+    description: Allow player to use all commands
+    default: false
+    children:
+      xclaim.commands.create: true
+      xclaim.commands.home: true
+      xclaim.commands.sethome: true
+      xclaim.commands.remove: true
+      xclaim.commands.info: true
+      xclaim.commands.addOwner: true
+      xclaim.commands.delOwner: true
+      xclaim.commands.addMember: true
+      xclaim.commands.delMember: true
+      xclaim.commands.leave: true
+  xclaim.others.remove:
+    description: Allow player to remove others claims
+    default: false
+  xclaim.others.blocks.break:
+    description: Allow player to break blocks in others claims
+    default: false
+  xclaim.others.blocks.place:
+    description: Allow player to place blocks in others claims
+    default: false
+  xclaim.others.blocks.*:
+    description: Allow player to place/break blocks in others claims
+    default: false
+    children:
+      xclaim.others.blocks.break: true
+      xclaim.others.blocks.place: true
+  xclaim.others.entity.hit:
+    description: Allow player to hit entity in others claims
+    default: false
+  xclaim.others.entity.arrow:
+    description: Allow player to shoot entity in others claims
+    default: false
+  xclaim.others.entity.leash:
+    description: Allow player to leash others claims' entities
+    default: false
+  xclaim.others.entity.unleash:
+    description: Allow player to unleash others claims' entities
+    default: false
+  xclaim.others.entity.*:
+    description: Allow player to leash/unleash others claims' entities
+    default: false
+    children:
+      xclaim.others.entity.leash: true
+      xclaim.others.entity.unleash: true
+  xclaim.others.bow:
+    description: Allow player to use bows in others claims
+    default: false
+  xclaim.others.interact:
+    description: Allow player to interact with others claims
+    default: false
+  xclaim.others.armorStand:
+    description: Allow player to pickup stuff on armorStand in others claims
+    default: false
+  xclaim.others.paintings:
+    description: Allow player to remove paintings in others claims
+    default: false
+  xclaim.others.farmland.break:
+    description: Allow player to break farmland in others claims
+    default: false
+  xclaim.others.tnt.damage.entity:
+    description: Allow player's tnts to damage others claims' entities
+    default: false
+  xclaim.others.tnt.damage.blocks:
+    description: Allow player's tnts to destroy others claims' blocks
+    default: false
+  xclaim.others.tnt.damage.*:
+    description: Allow player's tnts to damage others claims
+    default: false
+    children:
+      xclaim.others.tnt.damage.entity: true
+      xclaim.others.tnt.damage.blocks: true
+  xclaim.others.items.pickup:
+    description: Allow player to pickup items in others claims
+    default: false
+  xclaim.others.items.drop:
+    description: Allow player to drop items in others claims
+    default: false
+  xclaim.others.items.*:
+    description: Allow player to use items in others claims
+    default: false
+    children:
+      xclaim.others.items.pickup: true
+      xclaim.others.items.drop: true
+  xclaim.others.*:
+    description: Granted all others permissions to player
+    default: false
+    children:
+      xclaim.others.remove: true
+      xclaim.others.blocks.*: true
+      xclaim.others.entity.hit: true
+      xclaim.others.entity.arrow: true
+      xclaim.others.bow: true
+      xclaim.others.interact: true
+      xclaim.others.interact.armorStand: true
+      xclaim.others.interact.paintings: true
+      xclaim.others.farmland.break: true
+      xclaim.others.tnt.damage.*: true
+      xclaim.others.items.*: true
+      xclaim.others.entity.*: true
+  xclaim.claims.count.unlimited:
+    description: Allow player to create unlimited amount of claims
+    default: false
+  xclaim.claims.range.unlimited:
+    description: Allow player to create claims with unlimited range
+    default: false
+  xclaim.claims.*:
+    description: Granted all claims permissions
+    default: false
+    children:
+      xclaim.claims.count.unlimited: true
+      xclaim.claims.range.unlimited: true
+  xclaim.*:
+    description: Wildcard permission
+    default: op
+    children:
+      xclaim.commands.*: true
+      xclaim.others.*: true
+      xclaim.claims.*: true

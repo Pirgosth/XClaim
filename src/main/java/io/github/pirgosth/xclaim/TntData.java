@@ -1,42 +1,36 @@
 package io.github.pirgosth.xclaim;
 
-import java.util.Set;
-
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BlockVector;
+import org.jetbrains.annotations.NotNull;
 
-public class TntData{
-	private Location l = null;
-	private Player p = null;
-	
-	public TntData(Location l, Player p) {
-		this.l = l;
-		this.p = p;
-	}
-	
-	public Location getLocation() {
-		return l;
-	}
-	
-	public Player getPlayer() {
-		return p;
-	}
-	
-	public boolean equals(Location l) {
-		return (this.l.getX() == l.getBlockX() && this.l.getY() == l.getBlockY() && this.l.getZ() == l.getBlockZ());
-	}
-	
-	public boolean equals(Player p) {
-		return this.p == p;
-	}
-	
-	public static TntData getTntData(Set<TntData> Tnts, Location l) {
-		for(TntData tnt: Tnts) {
-			if(tnt.equals(l)) {
-				return tnt;
-			}
-		}
-		return null;
-	}
-	
+import java.util.Objects;
+
+public class TntData {
+    @Getter @NotNull
+    private final Location location;
+    @Getter
+    private final Player player;
+
+    public TntData(@NotNull Location location, Player player) {
+        this.location = location;
+        this.player = player;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TntData tntData = (TntData) o;
+        return Objects.equals(location.getBlockX(), tntData.location.getBlockX())
+                && Objects.equals(location.getBlockY(), tntData.location.getBlockY())
+                && Objects.equals(location.getBlockZ(), tntData.location.getBlockZ());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+    }
 }

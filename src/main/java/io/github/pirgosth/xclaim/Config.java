@@ -45,6 +45,7 @@ public class Config {
 		fileConfig = YamlConfiguration.loadConfiguration(file);
 		if(!file.exists()) {
 			try {
+				file.getParentFile().mkdirs();
 				file.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();

@@ -3,6 +3,7 @@ package io.github.pirgosth.xclaim.cache;
 import io.github.pirgosth.xclaim.config.ClaimConfiguration;
 import io.github.pirgosth.xclaim.config.WorldSection;
 import io.github.pirgosth.xclaim.config.XClaimConfig;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,7 @@ public class PlayerClaimCacheManager implements IPlayerClaimCacheManager {
     }
 
     @Override
-    public boolean updatePlayerClaimCache(@NotNull Player player) {
+    public boolean updatePlayerClaimCache(@NotNull Player player, boolean force) {
         IPlayerClaimCache playerClaimCache = this.getPlayerClaimCache(player);
 
         ClaimConfiguration oldClaim = playerClaimCache.getClaim();
@@ -49,7 +50,7 @@ public class PlayerClaimCacheManager implements IPlayerClaimCacheManager {
             return oldClaim == null;
         }
 
-        if(oldClaim != null && oldClaim.getRegion().contains(player)) {
+        if(!force && oldClaim != null && oldClaim.getRegion().contains(player)) {
             return false;
         }
 
@@ -57,5 +58,15 @@ public class PlayerClaimCacheManager implements IPlayerClaimCacheManager {
         return true;
     }
 
+    @Override
+    public boolean updatePlayerClaimCache(@NotNull Player player) {
+        return this.updatePlayerClaimCache(player, false);
+    }
 
+    @Override
+    public void updateOnlinePlayersClaimCache(boolean force) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            this.updatePlayerClaimCache(onlinePlayer, force);
+        }
+    }
 }

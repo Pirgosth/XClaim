@@ -45,7 +45,7 @@ public class WorldSection {
         this.claimConfigurations = new ArrayList<>();
         this.regionChunkMap = new HashMap<>();
 
-        ArrayList<ClaimConfiguration> claimConfigurations = new ArrayList<>(SerializationUtils.safeListCast(ClaimConfiguration.class, (List<?>) rawClaims));
+        ArrayList<ClaimConfiguration> claimConfigurations = (rawClaims instanceof List) ? new ArrayList<>(SerializationUtils.safeListCast(ClaimConfiguration.class, (List<?>) rawClaims)) : new ArrayList<>();
         for (ClaimConfiguration claimConfig : claimConfigurations) {
             this.claimConfigurations.add(claimConfig);
             Set<ChunkCoordinates> coordinatesSet = RegionChunk.GetContainingChunkCoordinates(claimConfig.getRegion());
@@ -57,10 +57,10 @@ public class WorldSection {
 
         Map<String, Object> playerMap = playerYamlConfig.get().getValues(true);
         Object rawPlayers = playerMap.get("players");
-        if (!(rawPlayers instanceof List)) throw new IllegalArgumentException("PlayerConfiguration is not valid");
+        if (rawPlayers != null && !(rawPlayers instanceof List)) throw new IllegalArgumentException("PlayerConfiguration is not valid");
 
         ArrayList<PlayerConfiguration> deserializedPlayerConfigurations = new ArrayList<>();
-        for (Object rawPlayerConfig : (List<?>) rawPlayers) {
+        for (Object rawPlayerConfig : rawPlayers != null ? (List<?>) rawPlayers : new ArrayList<>()) {
             if (rawPlayerConfig instanceof Map<?, ?>) {
                 deserializedPlayerConfigurations.add(new PlayerConfiguration(this, SerializationUtils.safeMapSerialize((Map<?, ?>) rawPlayerConfig)));
             }

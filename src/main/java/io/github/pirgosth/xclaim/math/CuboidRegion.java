@@ -22,11 +22,11 @@ public class CuboidRegion extends Region implements ConfigurationSerializable {
     private final BlockVector highCorner;
 
     public CuboidRegion(Map<String, Object> map) {
-        Object rawWorldId = map.get("world-id");
+        Object rawWorldName = map.get("world");
         Object rawLowCorner = map.get("low-corner");
         Object rawHighCorner = map.get("high-corner");
 
-        this.world = (rawWorldId instanceof String) ? Bukkit.getWorld(UUID.fromString((String) rawWorldId)) : null;
+        this.world = (rawWorldName instanceof String) ? Bukkit.getWorld(((String) rawWorldName)) : null;
         this.lowCorner = (rawLowCorner instanceof Map) ? BlockVector.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawLowCorner)) : null;
         this.highCorner = (rawHighCorner instanceof Map) ? BlockVector.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawHighCorner)) : null;
         if (this.lowCorner == null) throw new IllegalArgumentException("Low corner is null.");
@@ -65,7 +65,7 @@ public class CuboidRegion extends Region implements ConfigurationSerializable {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("world-id", this.world.getUID().toString());
+        map.put("world", this.world.getName());
         map.put("low-corner", this.lowCorner.serialize());
         map.put("high-corner", this.highCorner.serialize());
 

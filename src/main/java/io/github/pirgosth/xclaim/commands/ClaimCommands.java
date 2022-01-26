@@ -67,10 +67,7 @@ public class ClaimCommands implements ICommandListener {
         }
 
         worldSection.createClaim(player, name, claimRegion);
-
-        /* TODO:
-        Refresh online players cache to take the new claim into account.
-        */
+        PlayerClaimCacheManager.getInstance().updateOnlinePlayersClaimCache(true);
 
         //TODO: Send success message to player
         ChatUtils.sendPlayerColorMessage(player, String.format("&3Claim &2%s &3successfully created.", name));
@@ -85,14 +82,13 @@ public class ClaimCommands implements ICommandListener {
             playerConfiguration.removeClaimConfiguration(claimConfiguration);
             if (member.getSpigotPlayer().isOnline()) {
                 Player onlinePlayer = member.getSpigotPlayer().getPlayer();
+                PlayerClaimCacheManager.getInstance().updatePlayerClaimCache(onlinePlayer);
                 ChatUtils.sendPlayerColorMessage(onlinePlayer, String.format("&a%s &3claim was removed.", claimConfiguration.getName()));
                 //TODO: Send message to members to notify them from the claim deletion.
             }
         }
-
         worldSection.removeClaim(claimConfiguration);
-
-        //TODO: Refresh claimCache from online players to remove outdated claim.
+        PlayerClaimCacheManager.getInstance().updateOnlinePlayersClaimCache(true);
     }
 
     private boolean removeClaimByName(Entity entity, String name) {
