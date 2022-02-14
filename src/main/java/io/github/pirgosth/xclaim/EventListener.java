@@ -62,7 +62,7 @@ public class EventListener implements Listener {
         boolean cancel = this.cancelEvent(player, location);
         if (cancel && !player.hasPermission(permission)) {
             if (this.canSendMessage(player)) {
-                ChatUtils.sendPlayerColorMessage(player, String.format("You can't do that here: %s", restriction));
+                ChatUtils.sendColorMessage(player, String.format("You can't do that here: %s", restriction));
             }
             return true;
         }
@@ -84,13 +84,13 @@ public class EventListener implements Listener {
 
             if (oldClaimConfiguration == null || !oldClaimConfiguration.getRegion().contains(player)) {
                 if (oldClaimConfiguration != null) {
-                    ChatUtils.sendPlayerColorMessage(player, String.format("&7Leaving &a%s &7claim.", oldClaimConfiguration.getName()));
+                    ChatUtils.sendColorMessage(player, String.format("&7Leaving &a%s &7claim.", oldClaimConfiguration.getName()));
                 }
 
                 PlayerClaimCacheManager.getInstance().updatePlayerClaimCache(player);
                 ClaimConfiguration freshClaimConfiguration = playerClaimCache.getClaim();
                 if (freshClaimConfiguration != null) {
-                    ChatUtils.sendPlayerColorMessage(player, String.format("&7Entering &a%s &7claim.", freshClaimConfiguration.getName()));
+                    ChatUtils.sendColorMessage(player, String.format("&7Entering &a%s &7claim.", freshClaimConfiguration.getName()));
                 }
             }
         }

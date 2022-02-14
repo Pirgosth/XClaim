@@ -44,7 +44,7 @@ public class ClaimCommands implements ICommandListener {
 
         if (radius < 0) {
             //TODO: Send error message to player
-            ChatUtils.sendPlayerColorMessage(player, "&cClaim size must be greater than 0.");
+            ChatUtils.sendColorMessage(player, "&cClaim size must be greater than 0.");
             return true;
         }
 
@@ -54,7 +54,7 @@ public class ClaimCommands implements ICommandListener {
         //If claim is too near to another
         if (!worldSection.isLandAvailable(claimRegion)) {
             //TODO: Send error message to player
-            ChatUtils.sendPlayerColorMessage(player, "&cThis location is to near to another claim.");
+            ChatUtils.sendColorMessage(player, "&cThis location is to near to another claim.");
             return true;
         }
 
@@ -62,7 +62,7 @@ public class ClaimCommands implements ICommandListener {
 
         if (!player.hasPermission("xclaim.claims.count.unlimited") && playerConfiguration.getClaimCount() >= XClaimConfig.getConfiguration().getClaimCountPerPlayer()) {
             //TODO: Send error message to player
-            ChatUtils.sendPlayerColorMessage(player, "&cYou already reached the maximum amount of claims.");
+            ChatUtils.sendColorMessage(player, "&cYou already reached the maximum amount of claims.");
             return true;
         }
 
@@ -70,7 +70,7 @@ public class ClaimCommands implements ICommandListener {
         PlayerClaimCacheManager.getInstance().updateOnlinePlayersClaimCache(true);
 
         //TODO: Send success message to player
-        ChatUtils.sendPlayerColorMessage(player, String.format("&3Claim &2%s &3successfully created.", name));
+        ChatUtils.sendColorMessage(player, String.format("&3Claim &2%s &3successfully created.", name));
         return true;
     }
 
@@ -83,7 +83,7 @@ public class ClaimCommands implements ICommandListener {
             if (member.getSpigotPlayer().isOnline()) {
                 Player onlinePlayer = member.getSpigotPlayer().getPlayer();
                 PlayerClaimCacheManager.getInstance().updatePlayerClaimCache(onlinePlayer);
-                ChatUtils.sendPlayerColorMessage(onlinePlayer, String.format("&a%s &3claim was removed.", claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlinePlayer, String.format("&a%s &3claim was removed.", claimConfiguration.getName()));
                 //TODO: Send message to members to notify them from the claim deletion.
             }
         }
@@ -98,14 +98,14 @@ public class ClaimCommands implements ICommandListener {
 
         //TODO: Send error message for no claim.
         if (claimConfiguration == null){
-            ChatUtils.sendPlayerColorMessage((Player) entity, String.format("&cYou do not have any claim named %s.", name));
+            ChatUtils.sendColorMessage((Player) entity, String.format("&cYou do not have any claim named %s.", name));
             return true;
         }
 
         ClaimMember claimMember = Objects.requireNonNull(claimConfiguration.getMember((OfflinePlayer) entity));
         //TODO: Send error message when not enough permission to remove current claim.
         if (claimMember.getRole() != ClaimMember.Role.Owner) {
-            ChatUtils.sendPlayerColorMessage((Player) entity, "&cYou do not have the right to remove this claim.");
+            ChatUtils.sendColorMessage((Player) entity, "&cYou do not have the right to remove this claim.");
             return true;
         }
 
@@ -120,7 +120,7 @@ public class ClaimCommands implements ICommandListener {
 
         //TODO: Send error message for no claim.
         if (claimConfiguration == null) {
-            ChatUtils.sendPlayerColorMessage((Player) entity, "&cYou are not in a claim.");
+            ChatUtils.sendColorMessage((Player) entity, "&cYou are not in a claim.");
             return true;
         }
 
@@ -128,12 +128,12 @@ public class ClaimCommands implements ICommandListener {
 
         //TODO: Send error message when not enough permission to remove current claim.
         if ((claimMember != null && claimMember.getRole() != ClaimMember.Role.Owner) || !entity.hasPermission("xclaim.admin.commands.remove.others")) {
-            ChatUtils.sendPlayerColorMessage((Player) entity, "&cYou do not have the right to remove this claim.");
+            ChatUtils.sendColorMessage((Player) entity, "&cYou do not have the right to remove this claim.");
             return true;
         }
 
         this.removeClaim(worldSection, claimConfiguration);
-        if(!claimConfiguration.isMember((OfflinePlayer) entity)) ChatUtils.sendPlayerColorMessage((Player) entity, String.format("&aClaim %s successfully removed.", claimConfiguration.getName()));
+        if(!claimConfiguration.isMember((OfflinePlayer) entity)) ChatUtils.sendColorMessage((Player) entity, String.format("&aClaim %s successfully removed.", claimConfiguration.getName()));
 
         return true;
     }
@@ -158,7 +158,7 @@ public class ClaimCommands implements ICommandListener {
             List<String> ownerNames = new ArrayList<>();
             for (ClaimMember member : claim.getMembers()) memberNames.add(member.getSpigotPlayer().getName());
             for (ClaimMember member : claim.getOwners()) ownerNames.add(member.getSpigotPlayer().getName());
-            ChatUtils.sendPlayerColorMessage(player, String.format("""
+            ChatUtils.sendColorMessage(player, String.format("""
                     &7Claim Info:
                     Name: &b%s
                     &7Borders: &b%s
@@ -166,7 +166,7 @@ public class ClaimCommands implements ICommandListener {
                     &7Members: &b%s
                     &7Owners: &b%s""", claim.getName(), claim.getRegion(), claim.getRegion().getRadius(), memberNames, ownerNames));
         } else {
-            ChatUtils.sendPlayerColorMessage(player, "&cYou are not in a claim.");
+            ChatUtils.sendColorMessage(player, "&cYou are not in a claim.");
         }
     }
 
@@ -184,13 +184,13 @@ public class ClaimCommands implements ICommandListener {
         WorldSection worldSection = Objects.requireNonNull(XClaimConfig.getConfiguration().getWorldSection(player.getWorld()));
         List<ClaimConfiguration> claimConfigurations = worldSection.getPlayerConfiguration(player).getClaimConfigurations();
         if (claimConfigurations.isEmpty()) {
-            ChatUtils.sendPlayerColorMessage(player, "&7You have no claim.");
+            ChatUtils.sendColorMessage(player, "&7You have no claim.");
             return;
         }
 
         List<String> claimNames = new ArrayList<>();
         for (ClaimConfiguration claimConfiguration : claimConfigurations) claimNames.add(claimConfiguration.getName());
-        ChatUtils.sendPlayerColorMessage(player, String.format("&7Your claims: &3%s", claimNames));
+        ChatUtils.sendColorMessage(player, String.format("&7Your claims: &3%s", claimNames));
     }
 
     @LibertyCommand(command = "claim.list")
@@ -218,13 +218,13 @@ public class ClaimCommands implements ICommandListener {
 
         if(claimConfiguration == null) {
             //TODO: Send error message on wrong claim name
-            ChatUtils.sendPlayerColorMessage(player, String.format("&cYou do not have any claim named %s.", claimName));
+            ChatUtils.sendColorMessage(player, String.format("&cYou do not have any claim named %s.", claimName));
             return true;
         }
 
         Location homeLocation = Objects.requireNonNull(playerConfiguration.getPlayerClaimConfiguration(claimConfiguration).getHome());
 
-        ChatUtils.sendPlayerColorMessage(player, String.format("&7Teleported you to claim &a%s.", claimName));
+        ChatUtils.sendColorMessage(player, String.format("&7Teleported you to claim &a%s.", claimName));
         player.teleport(homeLocation);
 
         return true;
@@ -241,19 +241,19 @@ public class ClaimCommands implements ICommandListener {
         ClaimConfiguration claimConfiguration = worldSection.getClaimConfigurationByLocation(player.getLocation());
 
         if (claimConfiguration == null) {
-            ChatUtils.sendPlayerColorMessage(player, "&cYou are not in a claim.");
+            ChatUtils.sendColorMessage(player, "&cYou are not in a claim.");
             return true;
         }
 
         if (!claimConfiguration.isMember(player)) {
-            ChatUtils.sendPlayerColorMessage(player, "&cYou are not member of this claim.");
+            ChatUtils.sendColorMessage(player, "&cYou are not member of this claim.");
             return true;
         }
 
         PlayerConfiguration playerConfiguration = worldSection.getPlayerConfiguration(player);
         playerConfiguration.getPlayerClaimConfiguration(claimConfiguration).setHome(player.getLocation());
 
-        ChatUtils.sendPlayerColorMessage(player, String.format("&3New home set for claim &2%s.", claimConfiguration.getName()));
+        ChatUtils.sendColorMessage(player, String.format("&3New home set for claim &2%s.", claimConfiguration.getName()));
         return true;
     }
 
@@ -263,24 +263,24 @@ public class ClaimCommands implements ICommandListener {
 
         if(claimConfiguration == null) {
             //TODO: Send error message when player is not in a claim
-            ChatUtils.sendPlayerColorMessage(sender, "&cYou are not in a claim.");
+            ChatUtils.sendColorMessage(sender, "&cYou are not in a claim.");
             return true;
         } else if(!claimConfiguration.isMember(sender) || claimConfiguration.getMember(sender).getRole() != ClaimMember.Role.Owner) {
             //TODO: Send error message when player is not member of the standing claim.
-            ChatUtils.sendPlayerColorMessage(sender, "&cYou do not have the right to manage this claim.");
+            ChatUtils.sendColorMessage(sender, "&cYou do not have the right to manage this claim.");
             return true;
         }
 
         Player playerToAdd = Bukkit.getPlayer(playerNameToAdd);
         if(playerToAdd == null) {
             //TODO: Send error message when typed player named does not exists or is not connected.
-            ChatUtils.sendPlayerColorMessage(sender, String.format("&cPlayer %s does not exists or is not connected.", playerNameToAdd));
+            ChatUtils.sendColorMessage(sender, String.format("&cPlayer %s does not exists or is not connected.", playerNameToAdd));
             return true;
         }
 
         if(claimConfiguration.isMember(playerToAdd)) {
             //TODO: Send error when player to add is already a member of this claim.
-            ChatUtils.sendPlayerColorMessage(sender, String.format("&cPlayer %s is already a member of this claim.", playerToAdd.getName()));
+            ChatUtils.sendColorMessage(sender, String.format("&cPlayer %s is already a member of this claim.", playerToAdd.getName()));
             return true;
         }
 
@@ -296,7 +296,7 @@ public class ClaimCommands implements ICommandListener {
         for (ClaimMember member : claimConfiguration.getMembers()) {
             if(member.getSpigotPlayer().isOnline()) {
                 Player onlineMember = member.getSpigotPlayer().getPlayer();
-                ChatUtils.sendPlayerColorMessage(onlineMember, String.format("&aPlayer %s was added to %s claim.", playerToAdd.getName(), claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s was added to %s claim.", playerToAdd.getName(), claimConfiguration.getName()));
             }
         }
 
@@ -329,11 +329,11 @@ public class ClaimCommands implements ICommandListener {
 
         if(claimConfiguration == null) {
             //TODO: Send error message when player is not in a claim
-            ChatUtils.sendPlayerColorMessage(sender, "&cYou are not in a claim.");
+            ChatUtils.sendColorMessage(sender, "&cYou are not in a claim.");
             return true;
         } else if(!claimConfiguration.isMember(sender) || claimConfiguration.getMember(sender).getRole() != ClaimMember.Role.Owner) {
             //TODO: Send error message when player is not member of the standing claim.
-            ChatUtils.sendPlayerColorMessage(sender, "&cYou do not have the right to manage this claim.");
+            ChatUtils.sendColorMessage(sender, "&cYou do not have the right to manage this claim.");
             return true;
         }
 
@@ -342,11 +342,11 @@ public class ClaimCommands implements ICommandListener {
 
         if(memberToRemove == null) {
             //TODO: Send error message when typed player named does not belong to this claim.
-            ChatUtils.sendPlayerColorMessage(sender, String.format("&cPlayer %s does not exists or is not member of this claim", playerNameToRemove));
+            ChatUtils.sendColorMessage(sender, String.format("&cPlayer %s does not exists or is not member of this claim", playerNameToRemove));
             return true;
         } else if (senderMember.equals(memberToRemove)) {
             //TODO: Send error message when sender try to remove itself from his claim.
-            ChatUtils.sendPlayerColorMessage(sender, "&cYou cannot remove yourself from a claim. Use the leave command instead.");
+            ChatUtils.sendColorMessage(sender, "&cYou cannot remove yourself from a claim. Use the leave command instead.");
             return true;
         }
 
@@ -358,7 +358,7 @@ public class ClaimCommands implements ICommandListener {
         for (ClaimMember member : claimConfiguration.getMembers()) {
             if(member.getSpigotPlayer().isOnline()) {
                 Player onlineMember = member.getSpigotPlayer().getPlayer();
-                ChatUtils.sendPlayerColorMessage(onlineMember, String.format("&aPlayer %s was removed from %s claim.", playerNameToRemove, claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s was removed from %s claim.", playerNameToRemove, claimConfiguration.getName()));
             }
         }
 
@@ -381,11 +381,11 @@ public class ClaimCommands implements ICommandListener {
 
         if (claimConfiguration == null) {
             //TODO: Send error message when player is not in a claim
-            ChatUtils.sendPlayerColorMessage(player, "&cYou are not in a claim.");
+            ChatUtils.sendColorMessage(player, "&cYou are not in a claim.");
             return true;
         } else if (!claimConfiguration.isMember(player)) {
             //TODO: Send error message when player is not member of this claim.
-            ChatUtils.sendPlayerColorMessage(player, "&cYou are not member of this claim.");
+            ChatUtils.sendColorMessage(player, "&cYou are not member of this claim.");
             return true;
         }
 
@@ -393,7 +393,7 @@ public class ClaimCommands implements ICommandListener {
 
         if (leavingMember.getRole().equals(ClaimMember.Role.Owner) && claimConfiguration.getOwners().size() == 1) {
             //TODO: Send error message when last owner tries to leave his claim.
-            ChatUtils.sendPlayerColorMessage(player, "&cYou are the last owner, you can't leave this claim. You must either add another owner or use the remove command instead.");
+            ChatUtils.sendColorMessage(player, "&cYou are the last owner, you can't leave this claim. You must either add another owner or use the remove command instead.");
             return true;
         }
 
@@ -404,11 +404,11 @@ public class ClaimCommands implements ICommandListener {
         for (ClaimMember member : claimConfiguration.getMembers()) {
             if(member.getSpigotPlayer().isOnline()) {
                 Player onlineMember = member.getSpigotPlayer().getPlayer();
-                ChatUtils.sendPlayerColorMessage(onlineMember, String.format("&aPlayer %s left %s claim.", player.getName(), claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s left %s claim.", player.getName(), claimConfiguration.getName()));
             }
         }
 
-        ChatUtils.sendPlayerColorMessage(player, String.format("&aYou left %s claim.", claimConfiguration.getName()));
+        ChatUtils.sendColorMessage(player, String.format("&aYou left %s claim.", claimConfiguration.getName()));
 
         return true;
     }
@@ -420,14 +420,14 @@ public class ClaimCommands implements ICommandListener {
 
         if (claimConfiguration == null) {
             //TODO: Send error message when claim name is incorrect.
-            ChatUtils.sendPlayerColorMessage(player, String.format("&cYou do not have any claim named %s.", claimName));
+            ChatUtils.sendColorMessage(player, String.format("&cYou do not have any claim named %s.", claimName));
             return true;
         }
 
         ClaimMember leaveMember = Objects.requireNonNull(claimConfiguration.getMember(player));
 
         if (leaveMember.getRole().equals(ClaimMember.Role.Owner) && claimConfiguration.getOwners().size() == 1) {
-            ChatUtils.sendPlayerColorMessage(player, "&cYou are the last owner, you can't leave this claim. You must either add another owner or use the remove command instead.");
+            ChatUtils.sendColorMessage(player, "&cYou are the last owner, you can't leave this claim. You must either add another owner or use the remove command instead.");
             //TODO: Send error message when last owner tries to leave his claim.
             return true;
         }
@@ -439,7 +439,7 @@ public class ClaimCommands implements ICommandListener {
         for (ClaimMember member : claimConfiguration.getMembers()) {
             if(member.getSpigotPlayer().isOnline()) {
                 Player onlineMember = member.getSpigotPlayer().getPlayer();
-                ChatUtils.sendPlayerColorMessage(onlineMember, String.format("&aPlayer %s left %s claim.", player.getName(), claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s left %s claim.", player.getName(), claimConfiguration.getName()));
             }
         }
 
