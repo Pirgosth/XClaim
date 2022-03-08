@@ -3,16 +3,14 @@ package io.github.pirgosth.xclaim.commands;
 import io.github.pirgosth.liberty.core.api.commands.CommandExecutor;
 import io.github.pirgosth.liberty.core.api.commands.ICommandArgument;
 import io.github.pirgosth.liberty.core.api.commands.ICommandListener;
-import io.github.pirgosth.liberty.core.api.commands.annotations.LibertyCommand;
-import io.github.pirgosth.liberty.core.api.commands.annotations.LibertyCommandArgument;
-import io.github.pirgosth.liberty.core.api.commands.annotations.LibertyCommandExecutor;
-import io.github.pirgosth.liberty.core.api.commands.annotations.LibertyCommandPermission;
+import io.github.pirgosth.liberty.core.api.commands.annotations.*;
 import io.github.pirgosth.liberty.core.api.utils.ChatUtils;
 import io.github.pirgosth.liberty.core.commands.CommandParameters;
 import io.github.pirgosth.xclaim.cache.IPlayerClaimCache;
 import io.github.pirgosth.xclaim.cache.PlayerClaimCacheManager;
 import io.github.pirgosth.xclaim.config.*;
 import io.github.pirgosth.xclaim.math.CuboidRegion;
+import io.github.pirgosth.xclaim.tabcompleter.ClaimHomeTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -120,7 +118,7 @@ public class ClaimCommands implements ICommandListener {
 
         //TODO: Send error message for no claim.
         if (claimConfiguration == null) {
-            ChatUtils.sendColorMessage((Player) entity, "&cYou are not in a claim.");
+            ChatUtils.sendColorMessage(entity, "&cYou are not in a claim.");
             return true;
         }
 
@@ -128,7 +126,7 @@ public class ClaimCommands implements ICommandListener {
 
         //TODO: Send error message when not enough permission to remove current claim.
         if ((claimMember != null && claimMember.getRole() != ClaimMember.Role.Owner) || !entity.hasPermission("xclaim.admin.commands.remove.others")) {
-            ChatUtils.sendColorMessage((Player) entity, "&cYou do not have the right to remove this claim.");
+            ChatUtils.sendColorMessage(entity, "&cYou do not have the right to remove this claim.");
             return true;
         }
 
@@ -207,6 +205,7 @@ public class ClaimCommands implements ICommandListener {
     @LibertyCommandPermission(permission = "xclaim.commands.home")
     @LibertyCommandExecutor(executor = CommandExecutor.ENTITY)
     @LibertyCommandArgument(type = ICommandArgument.ArgumentType.String)
+    @LibertyCommandTabCompleter(completer = ClaimHomeTabCompleter.class)
     public boolean homeCommand(CommandParameters params) {
         Player player = (Player) params.sender;
         if(this.preventCommand(player)) return true;
