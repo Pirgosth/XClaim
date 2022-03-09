@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ClaimHomeTabCompleter implements ICustomTabCompleter {
+public class ClaimNamesTabCompleter implements ICustomTabCompleter {
 
     @Override
     public List<String> complete(CommandSender commandSender) {

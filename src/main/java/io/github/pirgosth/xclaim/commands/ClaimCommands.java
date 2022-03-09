@@ -10,7 +10,9 @@ import io.github.pirgosth.xclaim.cache.IPlayerClaimCache;
 import io.github.pirgosth.xclaim.cache.PlayerClaimCacheManager;
 import io.github.pirgosth.xclaim.config.*;
 import io.github.pirgosth.xclaim.math.CuboidRegion;
-import io.github.pirgosth.xclaim.tabcompleter.ClaimHomeTabCompleter;
+import io.github.pirgosth.xclaim.tabcompleter.ClaimMembersTabCompleter;
+import io.github.pirgosth.xclaim.tabcompleter.ClaimNamesTabCompleter;
+import io.github.pirgosth.xclaim.tabcompleter.ClaimNonMemberPlayersTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -140,6 +142,7 @@ public class ClaimCommands implements ICommandListener {
     @LibertyCommandPermission(permission = "xclaim.commands.remove.self")
     @LibertyCommandExecutor(executor = CommandExecutor.ENTITY)
     @LibertyCommandArgument(type = ICommandArgument.ArgumentType.String, optional = true)
+    @LibertyCommandTabCompleter(completer = ClaimNamesTabCompleter.class)
     public boolean removeClaimCommand(CommandParameters params) {
         Entity entity = (Entity) params.sender;
         if (this.preventCommand(entity)) return true;
@@ -205,7 +208,7 @@ public class ClaimCommands implements ICommandListener {
     @LibertyCommandPermission(permission = "xclaim.commands.home")
     @LibertyCommandExecutor(executor = CommandExecutor.ENTITY)
     @LibertyCommandArgument(type = ICommandArgument.ArgumentType.String)
-    @LibertyCommandTabCompleter(completer = ClaimHomeTabCompleter.class)
+    @LibertyCommandTabCompleter(completer = ClaimNamesTabCompleter.class)
     public boolean homeCommand(CommandParameters params) {
         Player player = (Player) params.sender;
         if(this.preventCommand(player)) return true;
@@ -306,6 +309,7 @@ public class ClaimCommands implements ICommandListener {
     @LibertyCommandPermission(permission = "xclaim.commands.members.add")
     @LibertyCommandExecutor(executor = CommandExecutor.ENTITY)
     @LibertyCommandArgument(type = ICommandArgument.ArgumentType.String)
+    @LibertyCommandTabCompleter(completer = ClaimNonMemberPlayersTabCompleter.class)
     public boolean addMemberCommand(CommandParameters params) {
         Player player = (Player) params.sender;
         if(this.preventCommand(player)) return true;
@@ -316,6 +320,7 @@ public class ClaimCommands implements ICommandListener {
     @LibertyCommandPermission(permission = "xclaim.commands.owners.add")
     @LibertyCommandExecutor(executor = CommandExecutor.ENTITY)
     @LibertyCommandArgument(type = ICommandArgument.ArgumentType.String)
+    @LibertyCommandTabCompleter(completer = ClaimNonMemberPlayersTabCompleter.class)
     public boolean addOwnerCommand(CommandParameters params) {
         Player player = (Player) params.sender;
         if(this.preventCommand(player)) return true;
@@ -368,6 +373,7 @@ public class ClaimCommands implements ICommandListener {
     @LibertyCommandPermission(permission = "xclaim.commands.members.remove")
     @LibertyCommandExecutor(executor = CommandExecutor.ENTITY)
     @LibertyCommandArgument(type = ICommandArgument.ArgumentType.String)
+    @LibertyCommandTabCompleter(completer = ClaimMembersTabCompleter.class)
     public boolean removeMemberCommand(CommandParameters params) {
         Player player = (Player) params.sender;
         if(this.preventCommand(player)) return true;
@@ -449,6 +455,7 @@ public class ClaimCommands implements ICommandListener {
     @LibertyCommandPermission(permission = "xclaim.commands.leave")
     @LibertyCommandExecutor(executor = CommandExecutor.ENTITY)
     @LibertyCommandArgument(type = ICommandArgument.ArgumentType.String, optional = true)
+    @LibertyCommandTabCompleter(completer = ClaimNamesTabCompleter.class)
     public boolean leaveClaimCommand(CommandParameters params) {
         Player player = (Player) params.sender;
         if(this.preventCommand(player)) return true;
