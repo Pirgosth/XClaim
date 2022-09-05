@@ -23,7 +23,7 @@ public class ClaimNamesTabCompleter implements ICustomTabCompleter {
             return new ArrayList<>();
         PlayerConfiguration playerConfiguration = Objects.requireNonNull(XClaimConfig.getConfiguration().getWorldSection(world)).getPlayerConfiguration(player);
         List<String> claimNames = new ArrayList<>();
-        for (ClaimConfiguration claimConfiguration : playerConfiguration.getClaimConfigurations()) claimNames.add(claimConfiguration.getName());
+        for (ClaimConfiguration claimConfiguration : playerConfiguration.getClaimConfigurations()) claimNames.add(claimConfiguration.name);
         return claimNames;
     }
 }

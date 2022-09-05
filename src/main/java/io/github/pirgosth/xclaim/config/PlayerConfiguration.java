@@ -1,45 +1,56 @@
 package io.github.pirgosth.xclaim.config;
 
-import io.github.pirgosth.liberty.core.api.utils.SerializationUtils;
+import io.github.pirgosth.liberty.core.api.i18n.ResourceContext;
+import io.github.pirgosth.liberty.core.api.i18n.YamlContextField;
+import io.github.pirgosth.liberty.core.api.i18n.YamlField;
+import io.github.pirgosth.liberty.core.api.i18n.YamlSerializable;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-public class PlayerConfiguration implements ConfigurationSerializable {
-    @NotNull
-    private final WorldSection worldSection;
+public class PlayerConfiguration extends YamlSerializable {
+    @YamlContextField(key = "world-section")
+    private WorldSection worldSection;
     @Getter
-    private final OfflinePlayer player;
+    private OfflinePlayer player;
     @Getter
-    private final List<PlayerClaimConfiguration> playerClaimConfigurations;
+    @YamlField(key = "claims")
+    private List<PlayerClaimConfiguration> playerClaimConfigurations;
 
-    public PlayerConfiguration(@NotNull WorldSection worldSection, OfflinePlayer player) {
-        this.worldSection = worldSection;
+    public PlayerConfiguration(OfflinePlayer player) {
         this.player = player;
         this.playerClaimConfigurations = new ArrayList<>();
     }
 
-    public PlayerConfiguration(@NotNull WorldSection worldSection, Map<String, Object> map) {
-        this.worldSection = worldSection;
-        Object rawPlayer = map.get("player");
-        Object rawPlayerClaimConfigurations = map.get("claims");
+    public PlayerConfiguration() {
+        super();
+    }
 
-        this.player = (rawPlayer instanceof String) ? Bukkit.getOfflinePlayer(UUID.fromString((String) rawPlayer)) : null;
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = super.serialize();
+        // Manual player serialization.
+        map.put("player", this.player.getUniqueId().toString());
+        return map;
+    }
 
-        List<PlayerClaimConfiguration> deserializedPlayerClaimConfigurations = new ArrayList<>();
-        for (Object rawPlayerClaimConfig : (List<?>)rawPlayerClaimConfigurations) {
-            if (rawPlayerClaimConfig instanceof Map<?, ?>) {
-                deserializedPlayerClaimConfigurations.add(new PlayerClaimConfiguration(this.worldSection, SerializationUtils.safeMapSerialize((Map<?, ?>) rawPlayerClaimConfig)));
-            }
-        }
+    @Override
+    public void deserialize(Map<String, Object> values, @Nullable ResourceContext context) {
+        super.deserialize(values, context);
+        // Manual player deserialization.
+        Object rawPlayer = values.get("player");
+        if (!(rawPlayer instanceof String playerUUID))
+            return;
 
-        this.playerClaimConfigurations = deserializedPlayerClaimConfigurations;
+        this.player = Bukkit.getOfflinePlayer(UUID.fromString(playerUUID));
     }
 
     public int getClaimCount() {
@@ -58,7 +69,7 @@ public class PlayerConfiguration implements ConfigurationSerializable {
     @Nullable
     public ClaimConfiguration getClaimConfigurationByName(String name) {
         for (ClaimConfiguration claimConfiguration : this.getClaimConfigurations()) {
-            if (claimConfiguration.getName().equals(name)) return claimConfiguration;
+            if (claimConfiguration.name.equals(name)) return claimConfiguration;
         }
         return null;
     }
@@ -66,7 +77,7 @@ public class PlayerConfiguration implements ConfigurationSerializable {
     @Nullable
     public PlayerClaimConfiguration getPlayerClaimConfiguration(ClaimConfiguration claimConfiguration) {
         for (PlayerClaimConfiguration pcc : this.playerClaimConfigurations) {
-            if(pcc.getClaimConfiguration().getId().equals(claimConfiguration.getId())) return pcc;
+            if (pcc.getClaimConfiguration().getId().equals(claimConfiguration.getId())) return pcc;
         }
         return null;
     }
@@ -77,16 +88,5 @@ public class PlayerConfiguration implements ConfigurationSerializable {
 
     public boolean removeClaimConfiguration(ClaimConfiguration claimConfiguration) {
         return this.playerClaimConfigurations.removeIf(pcc -> pcc.getClaimConfiguration().getId().equals(claimConfiguration.getId()));
-    }
-
-    @NotNull
-    @Override
-    public Map<String, Object> serialize() {
-        List<Map<String, Object>> serializedClaims = new ArrayList<>();
-        for (PlayerClaimConfiguration pcc : this.playerClaimConfigurations) serializedClaims.add(pcc.serialize());
-        Map<String, Object> map = new HashMap<>();
-        map.put("player", this.player.getUniqueId().toString());
-        map.put("claims", serializedClaims);
-        return map;
     }
 }

@@ -1,42 +1,37 @@
 package io.github.pirgosth.xclaim.math;
 
+import io.github.pirgosth.liberty.core.api.i18n.ResourceContext;
 import io.github.pirgosth.liberty.core.api.utils.SerializationUtils;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
-public class CuboidRegion extends Region implements ConfigurationSerializable {
+public class CuboidRegion extends Region {
 
-    private final World world;
+    private World world;
     @NotNull
     @Getter
-    private final BlockVector lowCorner;
+    private BlockVector lowCorner;
     @NotNull
     @Getter
-    private final BlockVector highCorner;
-
-    public CuboidRegion(Map<String, Object> map) {
-        Object rawWorldName = map.get("world");
-        Object rawLowCorner = map.get("low-corner");
-        Object rawHighCorner = map.get("high-corner");
-
-        this.world = (rawWorldName instanceof String) ? Bukkit.getWorld(((String) rawWorldName)) : null;
-        this.lowCorner = (rawLowCorner instanceof Map) ? BlockVector.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawLowCorner)) : null;
-        this.highCorner = (rawHighCorner instanceof Map) ? BlockVector.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawHighCorner)) : null;
-        if (this.lowCorner == null) throw new IllegalArgumentException("Low corner is null.");
-        if (this.highCorner == null) throw new IllegalArgumentException("High corner is null.");
-    }
+    private BlockVector highCorner;
 
     public CuboidRegion(Location center, int radius) {
         world = Objects.requireNonNull(center.getWorld());
         lowCorner = new BlockVector(center.getX() - radius, world.getMinHeight(), center.getZ() - radius);
         highCorner = new BlockVector(center.getX() + radius, world.getMaxHeight(), center.getZ() + radius);
+    }
+
+    public CuboidRegion() {
+        super();
     }
 
     public boolean contains(Location location) {
@@ -68,8 +63,21 @@ public class CuboidRegion extends Region implements ConfigurationSerializable {
         map.put("world", this.world.getName());
         map.put("low-corner", this.lowCorner.serialize());
         map.put("high-corner", this.highCorner.serialize());
-
         return map;
+    }
+
+    @Override
+    public void deserialize(Map<String, Object> values, @Nullable ResourceContext context) {
+        if (!(values.get("world") instanceof String rawWorldName))
+            throw new IllegalArgumentException("Invalid type for world!");
+        if (!(values.get("low-corner") instanceof Map rawLowCorner))
+            throw new IllegalArgumentException("Invalid type for low-corner!");
+        if (!(values.get("high-corner") instanceof Map rawHighCorner))
+            throw new IllegalArgumentException("Invalid type for high-corner!");
+
+        this.world = Bukkit.getWorld(rawWorldName);
+        this.lowCorner = BlockVector.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawLowCorner));
+        this.highCorner = BlockVector.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawHighCorner));
     }
 
     @Override

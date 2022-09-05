@@ -60,7 +60,7 @@ public class ClaimCommands implements ICommandListener {
 
         PlayerConfiguration playerConfiguration = worldSection.getPlayerConfiguration(player);
 
-        if (!player.hasPermission("xclaim.claims.count.unlimited") && playerConfiguration.getClaimCount() >= XClaimConfig.getConfiguration().getClaimCountPerPlayer()) {
+        if (!player.hasPermission("xclaim.claims.count.unlimited") && playerConfiguration.getClaimCount() >= XClaimConfig.getConfiguration().claimCountPerPlayer) {
             //TODO: Send error message to player
             ChatUtils.sendColorMessage(player, "&cYou already reached the maximum amount of claims.");
             return true;
@@ -83,7 +83,7 @@ public class ClaimCommands implements ICommandListener {
             if (member.getSpigotPlayer().isOnline()) {
                 Player onlinePlayer = member.getSpigotPlayer().getPlayer();
                 PlayerClaimCacheManager.getInstance().updatePlayerClaimCache(onlinePlayer);
-                ChatUtils.sendColorMessage(onlinePlayer, String.format("&a%s &3claim was removed.", claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlinePlayer, String.format("&a%s &3claim was removed.", claimConfiguration.name));
                 //TODO: Send message to members to notify them from the claim deletion.
             }
         }
@@ -133,7 +133,7 @@ public class ClaimCommands implements ICommandListener {
         }
 
         this.removeClaim(worldSection, claimConfiguration);
-        if(!claimConfiguration.isMember((OfflinePlayer) entity)) ChatUtils.sendColorMessage((Player) entity, String.format("&aClaim %s successfully removed.", claimConfiguration.getName()));
+        if(!claimConfiguration.isMember((OfflinePlayer) entity)) ChatUtils.sendColorMessage((Player) entity, String.format("&aClaim %s successfully removed.", claimConfiguration.name));
 
         return true;
     }
@@ -165,7 +165,7 @@ public class ClaimCommands implements ICommandListener {
                     &7Borders: &b%s
                     &7Radius: &b%s
                     &7Members: &b%s
-                    &7Owners: &b%s""", claim.getName(), claim.getRegion(), claim.getRegion().getRadius(), memberNames, ownerNames));
+                    &7Owners: &b%s""", claim.name, claim.getRegion(), claim.getRegion().getRadius(), memberNames, ownerNames));
         } else {
             ChatUtils.sendColorMessage(player, "&cYou are not in a claim.");
         }
@@ -190,7 +190,7 @@ public class ClaimCommands implements ICommandListener {
         }
 
         List<String> claimNames = new ArrayList<>();
-        for (ClaimConfiguration claimConfiguration : claimConfigurations) claimNames.add(claimConfiguration.getName());
+        for (ClaimConfiguration claimConfiguration : claimConfigurations) claimNames.add(claimConfiguration.name);
         ChatUtils.sendColorMessage(player, String.format("&7Your claims: &3%s", claimNames));
     }
 
@@ -255,7 +255,7 @@ public class ClaimCommands implements ICommandListener {
         PlayerConfiguration playerConfiguration = worldSection.getPlayerConfiguration(player);
         playerConfiguration.getPlayerClaimConfiguration(claimConfiguration).setHome(player.getLocation());
 
-        ChatUtils.sendColorMessage(player, String.format("&3New home set for claim &2%s.", claimConfiguration.getName()));
+        ChatUtils.sendColorMessage(player, String.format("&3New home set for claim &2%s.", claimConfiguration.name));
         return true;
     }
 
@@ -298,7 +298,7 @@ public class ClaimCommands implements ICommandListener {
         for (ClaimMember member : claimConfiguration.getMembers()) {
             if(member.getSpigotPlayer().isOnline()) {
                 Player onlineMember = member.getSpigotPlayer().getPlayer();
-                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s was added to %s claim.", playerToAdd.getName(), claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s was added to %s claim.", playerToAdd.getName(), claimConfiguration.name));
             }
         }
 
@@ -362,7 +362,7 @@ public class ClaimCommands implements ICommandListener {
         for (ClaimMember member : claimConfiguration.getMembers()) {
             if(member.getSpigotPlayer().isOnline()) {
                 Player onlineMember = member.getSpigotPlayer().getPlayer();
-                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s was removed from %s claim.", playerNameToRemove, claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s was removed from %s claim.", playerNameToRemove, claimConfiguration.name));
             }
         }
 
@@ -409,11 +409,11 @@ public class ClaimCommands implements ICommandListener {
         for (ClaimMember member : claimConfiguration.getMembers()) {
             if(member.getSpigotPlayer().isOnline()) {
                 Player onlineMember = member.getSpigotPlayer().getPlayer();
-                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s left %s claim.", player.getName(), claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s left %s claim.", player.getName(), claimConfiguration.name));
             }
         }
 
-        ChatUtils.sendColorMessage(player, String.format("&aYou left %s claim.", claimConfiguration.getName()));
+        ChatUtils.sendColorMessage(player, String.format("&aYou left %s claim.", claimConfiguration.name));
 
         return true;
     }
@@ -444,7 +444,7 @@ public class ClaimCommands implements ICommandListener {
         for (ClaimMember member : claimConfiguration.getMembers()) {
             if(member.getSpigotPlayer().isOnline()) {
                 Player onlineMember = member.getSpigotPlayer().getPlayer();
-                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s left %s claim.", player.getName(), claimConfiguration.getName()));
+                ChatUtils.sendColorMessage(onlineMember, String.format("&aPlayer %s left %s claim.", player.getName(), claimConfiguration.name));
             }
         }
 

@@ -1,22 +1,27 @@
 package io.github.pirgosth.xclaim.config;
 
+import io.github.pirgosth.liberty.core.api.i18n.ResourceContext;
+import io.github.pirgosth.liberty.core.api.i18n.YamlContextField;
+import io.github.pirgosth.liberty.core.api.i18n.YamlSerializable;
 import io.github.pirgosth.liberty.core.api.utils.SerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PlayerClaimConfiguration implements ConfigurationSerializable {
+public class PlayerClaimConfiguration extends YamlSerializable {
     @NotNull
-    private final WorldSection worldSection;
-    @Getter @NotNull
-    private final ClaimConfiguration claimConfiguration;
-    @NotNull @Getter @Setter
+    @YamlContextField(key = "world-section")
+    private WorldSection worldSection;
+    @NotNull
+    @Getter
+    private ClaimConfiguration claimConfiguration;
+    @NotNull
+    @Getter
+    @Setter
     private Location home;
 
     public PlayerClaimConfiguration(@NotNull WorldSection worldSection, @NotNull ClaimConfiguration claimConfiguration, @NotNull Location home) {
@@ -25,23 +30,32 @@ public class PlayerClaimConfiguration implements ConfigurationSerializable {
         this.home = home;
     }
 
-    public PlayerClaimConfiguration(@NotNull WorldSection worldSection, Map<String, Object> map) {
-        this.worldSection = worldSection;
-        Object rawClaimConfigId = map.get("id");
-        Object rawHome = map.get("home");
-        UUID claimId = (rawClaimConfigId instanceof String) ? UUID.fromString((String) rawClaimConfigId) : null;
-        this.home = (rawHome instanceof Map) ? Location.deserialize(SerializationUtils.safeMapSerialize((Map<?, ?>) rawHome)) : Location.deserialize(new HashMap<>());
-        this.claimConfiguration = claimId != null ? this.worldSection.getClaimConfigurationById(claimId) : null;
-        //TODO: Improve error management.
-        if(this.claimConfiguration == null) throw new IllegalArgumentException("Invalid claim configuration for claim id: " + claimId);
+    public PlayerClaimConfiguration() {
+        super();
     }
 
     @NotNull
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = super.serialize();
         map.put("id", this.claimConfiguration.getId().toString());
         map.put("home", this.home.serialize());
         return map;
+    }
+
+    @Override
+    public void deserialize(Map<String, Object> values, ResourceContext context) {
+        super.deserialize(values, context);
+        Object rawClaimConfigId = values.get("id");
+        Object rawHome = values.get("home");
+
+        if (!(rawClaimConfigId instanceof String claimIdUUID))
+            return;
+
+        if (!(rawHome instanceof Map homeMap))
+            return;
+
+        this.home = Location.deserialize(SerializationUtils.safeMapSerialize(homeMap));
+        this.claimConfiguration = this.worldSection.getClaimConfigurationById(UUID.fromString(claimIdUUID));
     }
 }

@@ -1,17 +1,18 @@
 package io.github.pirgosth.xclaim.config;
 
+import io.github.pirgosth.liberty.core.api.i18n.ResourceContext;
+import io.github.pirgosth.liberty.core.api.i18n.YamlSerializable;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ClaimMember implements ConfigurationSerializable {
+public class ClaimMember extends YamlSerializable {
 
     public enum Role {
         Member,
@@ -19,8 +20,9 @@ public class ClaimMember implements ConfigurationSerializable {
     }
 
     @Getter
-    private final OfflinePlayer spigotPlayer;
-    @Getter @Setter
+    private OfflinePlayer spigotPlayer;
+    @Getter
+    @Setter
     private Role role;
 
     public ClaimMember(OfflinePlayer player, Role role) {
@@ -28,12 +30,8 @@ public class ClaimMember implements ConfigurationSerializable {
         this.role = role;
     }
 
-    public ClaimMember(Map<String, Object> map) {
-        Object rawSpigotPlayer = map.get("player");
-        Object rawRole = map.get("role");
-
-        this.spigotPlayer = (rawSpigotPlayer instanceof String) ? Bukkit.getOfflinePlayer(UUID.fromString((String) rawSpigotPlayer)) : null;
-        this.role = (rawRole instanceof Integer) ? Role.values()[(Integer) rawRole] : Role.Member;
+    public ClaimMember() {
+        super();
     }
 
     @NotNull
@@ -43,5 +41,16 @@ public class ClaimMember implements ConfigurationSerializable {
         serialize.put("player", this.spigotPlayer.getUniqueId().toString());
         serialize.put("role", this.role.ordinal());
         return serialize;
+    }
+
+    @Override
+    public void deserialize(Map<String, Object> values, ResourceContext context) {
+        if (!(values.get("player") instanceof String rawSpigotPlayer))
+            throw new IllegalArgumentException("Invalid type for player!");
+        if (!(values.get("role") instanceof Integer rawRole))
+            throw new IllegalArgumentException("Invalid type for player!");
+
+        this.spigotPlayer = Bukkit.getOfflinePlayer(UUID.fromString(rawSpigotPlayer));
+        this.role = Role.values()[rawRole];
     }
 }

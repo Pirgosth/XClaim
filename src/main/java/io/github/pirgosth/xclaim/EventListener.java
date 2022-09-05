@@ -84,13 +84,13 @@ public class EventListener implements Listener {
 
             if (oldClaimConfiguration == null || !oldClaimConfiguration.getRegion().contains(player)) {
                 if (oldClaimConfiguration != null) {
-                    ChatUtils.sendColorMessage(player, String.format("&7Leaving &a%s &7claim.", oldClaimConfiguration.getName()));
+                    ChatUtils.sendColorMessage(player, String.format("&7Leaving &a%s &7claim.", oldClaimConfiguration.name));
                 }
 
                 PlayerClaimCacheManager.getInstance().updatePlayerClaimCache(player);
                 ClaimConfiguration freshClaimConfiguration = playerClaimCache.getClaim();
                 if (freshClaimConfiguration != null) {
-                    ChatUtils.sendColorMessage(player, String.format("&7Entering &a%s &7claim.", freshClaimConfiguration.getName()));
+                    ChatUtils.sendColorMessage(player, String.format("&7Entering &a%s &7claim.", freshClaimConfiguration.name));
                 }
             }
         }

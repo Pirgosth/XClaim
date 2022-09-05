@@ -1,26 +1,28 @@
 package io.github.pirgosth.xclaim.config;
 
-import io.github.pirgosth.liberty.core.api.utils.SerializationUtils;
+import io.github.pirgosth.liberty.core.api.i18n.ResourceContext;
+import io.github.pirgosth.liberty.core.api.i18n.YamlField;
+import io.github.pirgosth.liberty.core.api.i18n.YamlSerializable;
 import io.github.pirgosth.xclaim.math.CuboidRegion;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class ClaimConfiguration implements ConfigurationSerializable {
+public class ClaimConfiguration extends YamlSerializable {
     @Getter
-    private final UUID id;
+    private UUID id;
+    @YamlField(key = "name")
+    public String name;
     @Getter
-    private final String name;
+    @YamlField(key = "members")
+    private List<ClaimMember> members;
     @Getter
-    private final List<ClaimMember> members;
-    @Getter
-    @NotNull
-    private final CuboidRegion region;
+    @YamlField(key = "region")
+    private CuboidRegion region;
 
     public ClaimConfiguration(Player player, String name, @NotNull CuboidRegion region) {
         this.id = UUID.randomUUID();
@@ -29,17 +31,28 @@ public class ClaimConfiguration implements ConfigurationSerializable {
         this.members = new ArrayList<>(List.of(new ClaimMember(player, ClaimMember.Role.Owner)));
     }
 
-    public ClaimConfiguration(Map<String, Object> map) {
-        Object rawId = map.get("id");
-        Object rawName = map.get("name");
-        Object rawMembers = map.get("members");
-        Object rawRegion = map.get("region");
+    // Empty constructor used for deserialization.
+    public ClaimConfiguration() {
+        super();
+    }
 
-        this.id = (rawId instanceof String) ? UUID.fromString((String) rawId) : null;
-        this.name = (rawName instanceof String) ? (String) rawName : "Invalid Name";
-        this.members = (rawMembers instanceof List) ? SerializationUtils.safeListCast(ClaimMember.class, (List<?>) rawMembers) : new ArrayList<>();
-        this.region = (rawRegion instanceof Map) ? new CuboidRegion(SerializationUtils.safeMapSerialize((Map<?, ?>) rawRegion)) : null;
-        if (this.region == null) throw new IllegalArgumentException("Region is null in deserialization.");
+    @NotNull
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = super.serialize();
+        map.put("id", this.id.toString());
+        return map;
+    }
+
+    @Override
+    public void deserialize(Map<String, Object> values, ResourceContext context) {
+        super.deserialize(values, context);
+        Object rawClaimConfigId = values.get("id");
+
+        if (!(rawClaimConfigId instanceof String claimIdUUID))
+            return;
+
+        this.id = UUID.fromString(claimIdUUID);
     }
 
     @Nullable
@@ -68,23 +81,5 @@ public class ClaimConfiguration implements ConfigurationSerializable {
             if (member.getRole().equals(ClaimMember.Role.Owner)) owners.add(member);
         }
         return owners;
-    }
-
-    @NotNull
-    @Override
-    public Map<String, Object> serialize() {
-        List<Map<String, Object>> serializedMembers = new ArrayList<>();
-
-        for (ClaimMember member : this.members) {
-            serializedMembers.add(member.serialize());
-        }
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", this.id.toString());
-        map.put("name", this.name);
-        map.put("members", serializedMembers);
-        map.put("region", this.region.serialize());
-
-        return map;
     }
 }
