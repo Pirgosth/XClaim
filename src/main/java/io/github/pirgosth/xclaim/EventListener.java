@@ -62,7 +62,7 @@ public class EventListener implements Listener {
         boolean cancel = this.cancelEvent(player, location);
         if (cancel && !player.hasPermission(permission)) {
             if (this.canSendMessage(player)) {
-                ChatUtils.sendColorMessage(player, String.format("You can't do that here: %s", restriction));
+                ChatUtils.sendColorMessage(player, XClaimConfig.getConfiguration().getRestrictionMessage(restriction));
             }
             return true;
         }

@@ -12,7 +12,7 @@ restrictions:
   on-others-items-pickup: '&4You can''t pickup items here!'
   on-others-items-drop: '&4You can''t drop items here!'
   on-others-remove: '&4You are not allowed to remove this claim!'
-informations:
+information:
   #When player enter and leave a claim
   on-claim-entry: '&7Welcome to &a%f &7<&a%s&7> claim.'
   on-claim-exit: '&7You''re leaving &e%f &7<&e%s&7> claim.'

@@ -17,6 +17,7 @@ public class XClaimConfig extends APluginResource {
     public int claimCountPerPlayer;
     @YamlField(key = "enabled-worlds")
     private List<String> enabledWorlds = new ArrayList<>();
+    private final MessagesResource messagesResource = new MessagesResource();
     private final Map<String, WorldSection> worldSections = new HashMap<>();
     private static XClaimConfig instance = null;
 
@@ -33,6 +34,7 @@ public class XClaimConfig extends APluginResource {
     public void reload() {
         super.reload();
         worldSections.clear();
+        messagesResource.reload();
         for (String worldName : this.enabledWorlds) {
             this.worldSections.put(worldName, new WorldSection(worldName));
         }
@@ -43,6 +45,7 @@ public class XClaimConfig extends APluginResource {
         super.save();
         for (WorldSection section : this.worldSections.values())
             section.save();
+        messagesResource.save();
     }
 
     public boolean isWorldEnabled(@NotNull World world) {
@@ -52,5 +55,15 @@ public class XClaimConfig extends APluginResource {
     @Nullable
     public WorldSection getWorldSection(@NotNull World world) {
         return this.worldSections.get(world.getName());
+    }
+
+    @NotNull
+    public String getRestrictionMessage(String key) {
+        return this.messagesResource.restrictions.getOrDefault(key, "Missing restriction " + key + ".");
+    }
+
+    @NotNull
+    public String getInformativeMessage(String key) {
+        return this.messagesResource.information.getOrDefault(key, "Missing message " + key + ".");
     }
 }
