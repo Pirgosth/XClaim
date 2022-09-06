@@ -181,7 +181,7 @@ public class EventListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (isWorldDisabled(event.getPlayer().getWorld())) return;
         //if(event.getHand() == EquipmentSlot.HAND) return;
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null && event.getClickedBlock().getType().isInteractable() && !(event.getPlayer().isSneaking() && event.isBlockInHand())) {
             if (cancelEvent(event.getPlayer(), event.getClickedBlock().getLocation(), "xclaim.others.interact", "on-others-interact")) {
                 event.setCancelled(true);
             }
